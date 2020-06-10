@@ -6,6 +6,15 @@ from sam2lca.utils import get_script_dir, count_reads_taxid
 
 
 def sam2lca(sam, mappings, tree, update, process):
+    """Performs LCA on SAM/BAM/CRAM alignment file
+
+    Args:
+        sam (str): Path to SAM/BAM/CRAM alignment file
+        mappings (str): Type of Acc2Tax mapping
+        tree (str): Optional taxonomic tree
+        update (bool): Update NCBI taxonomy and Acc2Tax
+        process (int): Number of process for parallelization
+    """
     al = Alignment(al_file=sam, filetype='bam')
     read_dict = al.get_reads()
     get_mapping(mappings, update)

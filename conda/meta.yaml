@@ -1,0 +1,36 @@
+{% set setup_data = load_setup_py_data() %}
+package:
+  name: pydamage
+  version: {{ setup_data['version'] }}
+
+source:
+  git_rev: {{ setup_data['version'] }}
+  git_url: https://github.com/maxibor/sam2lca.git
+
+build:
+  number: 0
+  skip: true  # [win and py27 or win32]
+  script: {{ PYTHON }} -m pip install . --no-deps -vv
+
+requirements:
+  build:
+    - python
+    - setuptools
+    - pip
+  run:
+    - python>=3.6
+    - click>=7.0
+    - pip>=20.0.2
+    - bioconda::pysam>=0.15.2
+    - tqdm>=4.45.0
+    
+test:
+  commands:
+    - sam2lca --help
+
+about:
+  home: https://github.com/maxibor/sam2lca
+  license: GPL-3.0
+  summary: 'SAM2LCA'
+
+# Build using: conda build .
