@@ -1,0 +1,3 @@
+genome(mandatory), insert_size(mandatory), coverage(mandatory), deamination(mandatory), mutation_rate(optional), age(optional)
+genomes/escherichia_coli.fa, 150 , 0.05, no
+genomes/shigella_dysenteriae.fa, 150, 0.05, no

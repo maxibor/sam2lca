@@ -1,0 +1,5 @@
+cat genomes/*.fa > genomes/all_genomes.fa
+adrsm -t 8 adrsm_configs.csv
+bowtie2-build ../genomes/all_genomes.fa bt2/bt2_db
+bowtie2 -x bt2/bt2_db -a -1 metagenome.1.fastq -2 metagenome.2.fastq| samtools view -b - | samtools sort -o aligned.sorted.bam -
+samtools index aligned.sorted.bam

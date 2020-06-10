@@ -1,0 +1,3 @@
+Organism,taxonomy_id,percentage of metagenome,mean_insert_length,target_coverage,deamination
+escherichia_coli,562,0.5,150,0.05,False
+shigella_dysenteriae,622,0.5,150,0.05,False
