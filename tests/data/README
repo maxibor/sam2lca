@@ -1,5 +1,8 @@
 cat genomes/*.fa > genomes/all_genomes.fa
 adrsm -t 8 adrsm_configs.csv
 bowtie2-build ../genomes/all_genomes.fa bt2/bt2_db
-bowtie2 -x bt2/bt2_db -a -1 metagenome.1.fastq -2 metagenome.2.fastq| samtools view -b - | samtools sort -o aligned.sorted.bam -
+AdapterRemoval --file1 metagenome.1.fastq --file2 metagenome.2.fastq --output1 metagenome.1.trimmed.fastq --output2 metagenome.2.trimmed.fastq --trimns --trimqualities --minquality 30 --minlength 30 --qualitybase 33
+gzip metagenome.1.trimmed.fastq
+gzip metagenome.2.trimmed.fastq
+bowtie2 -x bt2/bt2_db -a -1 metagenome.1.trimmed.fastq.gz -2 metagenome.2.trimmed.fastq.gz | samtools view -b - | samtools sort -o aligned.sorted.bam -
 samtools index aligned.sorted.bam

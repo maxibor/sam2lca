@@ -1,9 +1,9 @@
 #!/usr/bin/env python3
 
-import ete3
 import multiprocessing
 from functools import partial
 import rocksdb
+import ete3
 
 
 class ReadToLca():
@@ -52,11 +52,10 @@ def compute_lca_read(read, read_dict, tree=None):
 def compute_lca_multi(read_dict, dbname, tree, update, process):
     global DB
     global NCBI
-    DB = rocksdb.DB(dbname, opts=rocksdb.Options(), read_only=True)
     NCBI = ete3.NCBITaxa()
-
-    if update:
-        NCBI.update_taxonomy_database()
+    print("Loading Taxonomy database")
+    DB = rocksdb.DB(dbname, opts=rocksdb.Options(), read_only=True)
+    print("Finished loading Taxonomy database")
 
     if tree:
         tree = ete3.Tree(tree)

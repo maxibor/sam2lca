@@ -18,10 +18,18 @@ from sam2lca.main import sam2lca
               default='nucl_gb',
               show_default=True,
               help='Mapping type of accession to TAXID')
-@click.option('-t',
-              '--tree',
-              type=click.Path(exists=True),
-              help='Optional Newick Taxonomy Tree')
+@click.option('-i',
+              '--identity',
+              type=float,
+              default=0.8,
+              show_default=True,
+              help='Minimum identity')
+@click.option('-l',
+              '--length',
+              type=int,
+              default=30,
+              show_default=True,
+              help='Minimum alignment length')
 @click.option('-p',
               '--process',
               type=int,
@@ -32,6 +40,15 @@ from sam2lca.main import sam2lca
               '--update',
               is_flag=True,
               help='Update local copy of NCBI taxonomy database')
+@click.option('-t',
+              '--tree',
+              type=click.Path(exists=True),
+              help='Optional Newick Taxonomy Tree')
+@click.option('-o',
+              '--output',
+              type=click.Path(writable=True, dir_okay=False, file_okay=True),
+              default=None,
+              help='sam2lca output file')
 def cli(no_args_is_help=True, **kwargs):
     """\b
     sam2lca: Last Common Ancestor on SAM/BAM/CRAM alignment files

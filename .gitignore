@@ -106,3 +106,4 @@ venv.bak/
 .nextflow
 .vscode/
 mappings
+aligned.sorted.sam2lca.json

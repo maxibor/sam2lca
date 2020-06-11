@@ -32,7 +32,8 @@ setup(
         'pysam',
         'tqdm',
         'xopen',
-        'python-rocksdb'
+        'python-rocksdb',
+        'ete3'
     ],
     packages=find_packages(include=['pydamage']),
     entry_points={

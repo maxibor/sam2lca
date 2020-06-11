@@ -6,25 +6,26 @@ import multiprocessing
 
 
 class Alignment():
-    def __init__(self, al_file, filetype):
+    def __init__(self, al_file):
         """
         Args:
             al_file (str): Path to alignment file
-            filetype (str): Type of alignment file (sam, bam, cram)
         """
         mode = {'sam': 'r', 'bam': 'rb', 'cram': 'rc'}
+        filetype = al_file.split(".")[-1]
         alignment = pysam.AlignmentFile(al_file, mode[filetype])
         self.al_file = al_file
         self.mode = mode[filetype]
         self.refs = alignment.references
         alignment.close()
 
-    def __get_reads_single__(self, ref, identity):
+    def __get_reads_single__(self, ref, identity, minlength):
         """Get reads passing identity threshold for each reference
 
         Args:
             ref (pysam reference): one of pysam.alignment.references
             identity (float): identity threshold
+            minlength(int): Length threshold.
         """
         resdic = {}
         al_file = pysam.AlignmentFile(self.al_file, self.mode)
@@ -35,19 +36,20 @@ class Alignment():
                 alnLen = read.query_alignment_length
                 readLen = read.query_length
                 ident = (alnLen - mismatch) / readLen
-                if ident >= identity:
+                if ident >= identity and alnLen >= minlength:
                     resdic[read.query_name] = read.reference_name
         return(resdic)
 
-    def get_reads(self, process=2, identity=0.9):
+    def get_reads(self, process=2, identity=0.9, minlength=30):
         """Get reads passing identity threshold
 
         Args:
             process (int, optional): Number of processes. Defaults to 2.
             identity (float, optional): Identity thresold. Defaults to 0.9.
+            minlengh(int, optional): Length threshold. Default to 30
         """
         get_reads_partial = partial(
-            self.__get_reads_single__, identity=identity)
+            self.__get_reads_single__, identity=identity, minlength=minlength)
         with multiprocessing.Pool(process) as p:
             results = p.map(get_reads_partial, self.refs)
 
