@@ -35,7 +35,7 @@ setup(
         'python-rocksdb',
         'ete3'
     ],
-    packages=find_packages(include=['pydamage']),
+    packages=find_packages(include=['sam2lca']),
     entry_points={
         'console_scripts': [
             'sam2lca = sam2lca.cli:cli'

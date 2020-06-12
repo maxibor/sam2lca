@@ -38,7 +38,6 @@ class ReadToLca():
             ancestor = (tree
                         .get_common_ancestor([str(i) for i in self.taxo_hits])
                         .name)
-
         return({self.read: int(ancestor)})
 
 
@@ -58,10 +57,10 @@ def compute_lca_multi(read_dict, dbname, tree, update, process):
     print("Finished loading Taxonomy database")
 
     if tree:
-        tree = ete3.Tree(tree)
+        thetree = ete3.Tree(tree)
 
     compute_lca_partial = partial(
-        compute_lca_read, read_dict=read_dict, tree=tree)
+        compute_lca_read, read_dict=read_dict, tree=thetree)
 
     with multiprocessing.Pool(process) as p:
         allres = p.map(compute_lca_partial, list(read_dict.keys()))

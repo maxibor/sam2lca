@@ -1,4 +1,4 @@
-name: publish_pypi
+name: publish-pypi
 
 on: 
   release:
@@ -14,7 +14,7 @@ jobs:
           uses: actions/setup-python@v1
           with:
             python-version: 3.7
-        - name: Build pydamage
+        - name: Build sam2lca
           run: |
             pip install wheel
             python setup.py sdist bdist_wheel

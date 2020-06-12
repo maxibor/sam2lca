@@ -1,13 +1,27 @@
 # sam2lca
 
-Lowest Common Ancestor from a SAM/BAM/CRAM alignment file
+[Lowest Common Ancestor](https://en.wikipedia.org/wiki/Lowest_common_ancestor) from a SAM/BAM/CRAM sequence alignment file
 
-## Requirements
 
-- [rocksdb](https://rocksdb.org/): install with conda `conda install -c conda-forge rocksdb`
+## Installation
 
-## Install from source
+### From source
 
 ```bash
+git clone git@github.com:maxibor/sam2lca.git
+conda env create -f environment.yml
+conda activate sam2lca
 pip install git+ssh://git@github.com/maxibor/sam2lca.git
 ```
+### From conda
+
+Will be available on conda upon first release
+
+### From Pypi
+
+Will be available on Pypi upon first release
+
+
+## Documentation
+
+[sam2lca.readthedocs.io/](https://sam2lca.readthedocs.io/)

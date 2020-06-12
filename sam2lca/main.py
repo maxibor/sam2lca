@@ -36,4 +36,4 @@ def sam2lca(sam, mappings, tree, update, process, identity, length, output):
                                          update,
                                          process)
     taxid_counts = utils.count_reads_taxid(reads_taxid_dict)
-    print(utils.taxid_to_lineage(taxid_counts, NCBI, output))
+    utils.taxid_to_lineage(taxid_counts, NCBI, output)

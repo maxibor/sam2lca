@@ -1,6 +1,6 @@
 {% set setup_data = load_setup_py_data() %}
 package:
-  name: pydamage
+  name: sam2lca
   version: {{ setup_data['version'] }}
 
 source:
@@ -18,19 +18,24 @@ requirements:
     - setuptools
     - pip
   run:
-    - python>=3.6
-    - click>=7.0
-    - pip>=20.0.2
-    - bioconda::pysam>=0.15.2
+    - python
+    - click >=7.0
+    - pip >=20.0.2
+    - conda-forge::ete3 >=3.1.1
+    - bioconda::pysam >=0.15.2
+    - conda-forge::rocksdb >=6.10.1
+    - conda-forge::python-rocksdb >=0.7.0
+    - conda-forge::xopen >=0.9.0
     - tqdm>=4.45.0
     
 test:
-  commands:
-    - sam2lca --help
+  imports:
+    - sam2lca
+
 
 about:
   home: https://github.com/maxibor/sam2lca
   license: GPL-3.0
-  summary: 'SAM2LCA'
+  summary: 'Performs LCA on SAM/BAM/CRAM alignment file'
 
-# Build using: conda build .
+# Build using: conda build -c conda-forge .
