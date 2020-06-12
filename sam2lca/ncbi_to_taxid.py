@@ -9,6 +9,7 @@ from xopen import xopen
 from tqdm import tqdm
 from subprocess import check_output
 import rocksdb
+import shutil
 
 
 class TqdmUpTo(tqdm):
@@ -54,14 +55,18 @@ def dl_mappings(mapping_url, md5_url, mapdir):
     Returns:
         mapping_fname (str): mapping filename 
     """
+    testdir = get_script_dir() + '/../tests/data/taxonomy/'
     md5_fname = md5_url.split("/")[-1]
     mapping_fname = mapping_url.split("/")[-1]
-    urllib.urlretrieve(md5_url, f"{mapdir}/{md5_fname}")
+    if mapping_fname != 'test.accession2taxid.gz':
+        urllib.urlretrieve(md5_url, f"{mapdir}/{md5_fname}")
 
-    with TqdmUpTo(unit='B', unit_scale=True, miniters=1, desc=mapping_fname) as t:
-        urllib.urlretrieve(mapping_url, filename=f"{mapdir}/{mapping_fname}",
-                           reporthook=t.update_to, data=None)
-
+        with TqdmUpTo(unit='B', unit_scale=True, miniters=1, desc=mapping_fname) as t:
+            urllib.urlretrieve(mapping_url, filename=f"{mapdir}/{mapping_fname}",
+                               reporthook=t.update_to, data=None)
+    else:
+        shutil.copy(testdir+mapping_fname, f"{mapdir}/{mapping_fname}")
+        shutil.copy(testdir+md5_fname, f"{mapdir}/{md5_fname}")
     with open(f"{mapdir}/{md5_fname}", 'r') as hf:
         for line in hf:
             md5_hash = line.rstrip().split()[0]
@@ -74,12 +79,13 @@ def dl_mappings(mapping_url, md5_url, mapdir):
     return(mapping_fname)
 
 
-def mapping_file_to_db(mapdb, mapfile, mapdir):
+def mapping_file_to_db(mapdb, mapfile, mapmd5, mapdir):
     """Read mapping to dict and pickle
 
     Args:
         mapdb (str): Mapping db name
         mapfile(str): Mapping file
+        mapmd5 (str): Mapping file md5
         mapdir (str): Mapping file location
     """
     db_name = f"{mapdir}/{mapdb}"
@@ -97,6 +103,8 @@ def mapping_file_to_db(mapdb, mapfile, mapdir):
                           bytes(acc_taxid, encoding='utf8'))
 
     db.write(batch)
+    os.remove(f"{mapdir}/{mapfile}")
+    os.remove(f"{mapdir}/{mapmd5}")
 
 
 def get_mapping(maptype, update):
@@ -129,12 +137,8 @@ def get_mapping(maptype, update):
         print("Inserting mappings into database")
         mapping_file_to_db(mapfile=mapname,
                            mapdb=map_db[maptype],
-                           mapdir=mapdir)
-    # else:
-    #     print(f"{maptype} mapping file present, reading from pickle file")
-    #     with open(f"{mapdir}/{map_pickle[maptype]}", 'rb') as p:
-    #         mapdict = pickle.load(p)
-    # return(mapdict)
+                           mapdir=mapdir,
+                           mapmd5=mapmd5[maptype].split("/")[-1])
 
 
 if __name__ == "__main__":
