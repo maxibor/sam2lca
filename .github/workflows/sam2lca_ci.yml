@@ -26,7 +26,7 @@ jobs:
         run: |
           pip install -e .
           pip install pytest
-          pytest
+          # pytest
       - name: Check sam2lca help message
         shell: bash -l {0}
         run: |
