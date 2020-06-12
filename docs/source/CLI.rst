@@ -1,5 +1,5 @@
-CLI
-===
+Command Line Interface
+======================
 
 To access the help menu:
 

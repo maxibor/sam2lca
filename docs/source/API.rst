@@ -1,5 +1,5 @@
-API
-===
+Python API
+==========
 
 .. automodule:: sam2lca.main
     :members:

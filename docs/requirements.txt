@@ -1,5 +1,3 @@
-python
-pip
 click
 pysam
 tqdm
