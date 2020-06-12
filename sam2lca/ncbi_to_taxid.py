@@ -45,13 +45,13 @@ def md5(fname):
     return hash_md5.hexdigest()
 
 
-def dl_mappings(mapping_url, md5_url, mapdir):
+def dl_mappings(mapping_url, md5_url, dbdir):
     """Download mapping file
 
     Args:
         mapping_url (str): URL of mapping file
         md5_url (str): URL of md5 mapping file
-        mapdir (str): path to mapping local directory
+        dbdir (str): path to mapping local directory
     Returns:
         mapping_fname (str): mapping filename 
     """
@@ -59,18 +59,18 @@ def dl_mappings(mapping_url, md5_url, mapdir):
     md5_fname = md5_url.split("/")[-1]
     mapping_fname = mapping_url.split("/")[-1]
     if mapping_fname != 'test.accession2taxid.gz':
-        urllib.urlretrieve(md5_url, f"{mapdir}/{md5_fname}")
+        urllib.urlretrieve(md5_url, f"{dbdir}/{md5_fname}")
 
         with TqdmUpTo(unit='B', unit_scale=True, miniters=1, desc=mapping_fname) as t:
-            urllib.urlretrieve(mapping_url, filename=f"{mapdir}/{mapping_fname}",
+            urllib.urlretrieve(mapping_url, filename=f"{dbdir}/{mapping_fname}",
                                reporthook=t.update_to, data=None)
     else:
-        shutil.copy(testdir+mapping_fname, f"{mapdir}/{mapping_fname}")
-        shutil.copy(testdir+md5_fname, f"{mapdir}/{md5_fname}")
-    with open(f"{mapdir}/{md5_fname}", 'r') as hf:
+        shutil.copy(testdir+mapping_fname, f"{dbdir}/{mapping_fname}")
+        shutil.copy(testdir+md5_fname, f"{dbdir}/{md5_fname}")
+    with open(f"{dbdir}/{md5_fname}", 'r') as hf:
         for line in hf:
             md5_hash = line.rstrip().split()[0]
-    file_hash = md5(f"{mapdir}/{mapping_fname}")
+    file_hash = md5(f"{dbdir}/{mapping_fname}")
     try:
         assert file_hash == md5_hash
     except AssertionError:
@@ -79,21 +79,21 @@ def dl_mappings(mapping_url, md5_url, mapdir):
     return(mapping_fname)
 
 
-def mapping_file_to_db(mapdb, mapfile, mapmd5, mapdir):
+def mapping_file_to_db(mapdb, mapfile, mapmd5, dbdir):
     """Read mapping to dict and pickle
 
     Args:
         mapdb (str): Mapping db name
         mapfile(str): Mapping file
         mapmd5 (str): Mapping file md5
-        mapdir (str): Mapping file location
+        dbdir (str): Mapping file location
     """
-    db_name = f"{mapdir}/{mapdb}"
+    db_name = f"{dbdir}/{mapdb}"
     db = rocksdb.DB(db_name, rocksdb.Options(create_if_missing=True))
     batch = rocksdb.WriteBatch()
 
-    nlines = wc(f"{mapdir}/{mapfile}")
-    with xopen(f"{mapdir}/{mapfile}") as acc:
+    nlines = wc(f"{dbdir}/{mapfile}")
+    with xopen(f"{dbdir}/{mapfile}") as acc:
         for line in tqdm(acc, total=nlines):
             if not line.startswith("accession"):
                 acc_line = line.split()
@@ -103,11 +103,11 @@ def mapping_file_to_db(mapdb, mapfile, mapmd5, mapdir):
                           bytes(acc_taxid, encoding='utf8'))
 
     db.write(batch)
-    os.remove(f"{mapdir}/{mapfile}")
-    os.remove(f"{mapdir}/{mapmd5}")
+    os.remove(f"{dbdir}/{mapfile}")
+    os.remove(f"{dbdir}/{mapmd5}")
 
 
-def get_mapping(maptype, update):
+def get_mapping(maptype, update, dbdir):
     """Get genbank to taxid mapping
 
     Args:
@@ -119,25 +119,25 @@ def get_mapping(maptype, update):
         print(f"mapping type not in {', '.join(list(mapfiles.keys()))}")
         sys.exit(1)
 
-    mapdir = get_script_dir()+"/mappings"
+    os.makedirs(dbdir, exist_ok=True)
 
-    if map_db[maptype] not in os.listdir(mapdir) or update:
+    if map_db[maptype] not in os.listdir(dbdir) or update:
         mapfile = mapfiles[maptype].split("/")[-1]
-        if mapfile not in os.listdir(mapdir) or update:
+        if mapfile not in os.listdir(dbdir) or update:
             try:
-                os.remove(f"{mapdir}/{mapfile}")
+                os.remove(f"{dbdir}/{mapfile}")
             except FileNotFoundError as e:
                 print(f"No local copy of {mapfile}")
 
             print(f"Downloading {maptype}  acc2tax mapping file")
             mapname = dl_mappings(mapping_url=mapfiles[maptype],
-                                  md5_url=mapmd5[maptype], mapdir=mapdir)
+                                  md5_url=mapmd5[maptype], dbdir=dbdir)
         else:
             mapname = mapfiles[maptype].split("/")[-1]
         print("Inserting mappings into database")
         mapping_file_to_db(mapfile=mapname,
                            mapdb=map_db[maptype],
-                           mapdir=mapdir,
+                           dbdir=dbdir,
                            mapmd5=mapmd5[maptype].split("/")[-1])
 
 

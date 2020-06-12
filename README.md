@@ -1,3 +1,4 @@
+![sam2lca-CI](https://github.com/maxibor/sam2lca/workflows/sam2lca-CI/badge.svg) 
 # sam2lca
 
 [Lowest Common Ancestor](https://en.wikipedia.org/wiki/Lowest_common_ancestor) from a SAM/BAM/CRAM sequence alignment file

@@ -3,6 +3,7 @@
 import click
 from sam2lca import __version__
 from sam2lca.main import sam2lca
+from pathlib import Path
 
 
 @click.command()
@@ -45,6 +46,13 @@ from sam2lca.main import sam2lca
               '--tree',
               type=click.Path(exists=True),
               help='Optional Newick Taxonomy Tree')
+@click.option('-d',
+              '--dbdir',
+              type=click.Path(writable=True,
+                              dir_okay=True, file_okay=False),
+              default=f"{str(Path.home())}/.sam2lca",
+              show_default=True,
+              help='Directory to store taxonomy databases')
 @click.option('-o',
               '--output',
               type=click.Path(writable=True, dir_okay=False, file_okay=True),

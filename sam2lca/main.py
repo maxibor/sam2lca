@@ -6,7 +6,7 @@ from sam2lca import utils
 import ete3
 
 
-def sam2lca(sam, mappings, tree, update, process, identity, length, output):
+def sam2lca(sam, mappings, tree, update, process, identity, length, dbdir, output):
     """Performs LCA on SAM/BAM/CRAM alignment file
 
     Args:
@@ -28,8 +28,8 @@ def sam2lca(sam, mappings, tree, update, process, identity, length, output):
     al = Alignment(al_file=sam)
     read_dict = al.get_reads(
         process=process, identity=identity, minlength=length)
-    get_mapping(mappings, update)
-    acc2tax_db = f"{utils.get_script_dir()}/mappings/{map_db[mappings]}"
+    get_mapping(mappings, update, dbdir=dbdir)
+    acc2tax_db = f"{dbdir}/{map_db[mappings]}"
     reads_taxid_dict = compute_lca_multi(read_dict,
                                          acc2tax_db,
                                          tree,
