@@ -57,7 +57,7 @@ def compute_lca_multi(read_dict, dbname, tree, update, process):
     print("Finished loading Taxonomy database")
 
     if tree:
-        thetree = ete3.Tree(tree)
+        thetree = ete3.Tree(tree, format=1)
 
     compute_lca_partial = partial(
         compute_lca_read, read_dict=read_dict, tree=thetree)
