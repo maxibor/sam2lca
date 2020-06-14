@@ -13,3 +13,6 @@ dependencies:
   - conda-forge::python-rocksdb >=0.7.0
   - conda-forge::xopen >=0.9.0
   - tqdm>=4.45.0
+  - nbsphinx
+  - sphinxcontrib-napoleon
+  - sphinx_click
