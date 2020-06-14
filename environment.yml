@@ -15,4 +15,4 @@ dependencies:
   - tqdm>=4.45.0
   - nbsphinx
   - sphinxcontrib-napoleon
-  - sphinx_click
+  - sphinx-click
