@@ -57,7 +57,7 @@ from pathlib import Path
               '--output',
               type=click.Path(writable=True, dir_okay=False, file_okay=True),
               default=None,
-              help='sam2lca output JSON file')
+              help='sam2lca output file')
 def cli(no_args_is_help=True, **kwargs):
     """\b
     sam2lca: Last Common Ancestor on SAM/BAM/CRAM alignment files

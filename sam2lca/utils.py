@@ -1,6 +1,8 @@
 import os
 import json
-
+import rocksdb
+from sam2lca.config import NCBI
+import pandas as pd
 
 def get_script_dir():
     return(os.path.dirname(os.path.realpath(__file__)))
@@ -24,7 +26,7 @@ def count_reads_taxid(read_taxid_dict):
 
 def output_file(sam_path):
     out = os.path.basename(sam_path).split(".")[:-1]
-    out = ".".join(out)+".sam2lca.json"
+    out = ".".join(out)+".sam2lca"
     return(out)
 
 
@@ -48,7 +50,7 @@ def check_extension(filename):
         raise Exception(f"{extension} file extension not supported")
 
 
-def taxid_to_lineage(taxid_count_dict, NCBI, output):
+def taxid_to_lineage(taxid_count_dict, output):
     res = {}
     for taxid in taxid_count_dict:
         read_count = taxid_count_dict[taxid]
@@ -63,8 +65,13 @@ def taxid_to_lineage(taxid_count_dict, NCBI, output):
                       'count': read_count,
                       'lineage': lineage}
 
-    with open(output, "w") as write_file:
+    (pd.DataFrame(res).transpose().sort_values("count", ascending=False)
+    .to_csv(f"{output}.csv", index_label='TAXID'))
+    with open(f"{output}.json", "w") as write_file:
         json.dump(res, write_file)
-    print(f"sam2lca results written to {output}")
+    print(f"sam2lca results written to:\n- {output}.json\n- {output}.csv")
 
     return(res)
+
+def get_db_connection(db_path):
+    return(rocksdb.DB(db_path, opts=rocksdb.Options(), read_only=True))

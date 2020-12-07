@@ -140,6 +140,9 @@ def get_mapping(maptype, update, dbdir):
                            dbdir=dbdir,
                            mapmd5=mapmd5[maptype].split("/")[-1])
 
+    # DB = rocksdb.DB(f"{dbdir}/{map_db[maptype]}", opts=rocksdb.Options(), read_only=True)
+    # return(f"{dbdir}/{map_db[maptype]}")
+
 
 if __name__ == "__main__":
     allmaps = get_mapping('pdb')
