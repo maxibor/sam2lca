@@ -2,9 +2,9 @@
 
 import multiprocessing
 from functools import partial
+from sam2lca.config import NCBI
+from ete3 import Tree
 import rocksdb
-import ete3
-
 
 class ReadToLca():
     def __init__(self, read, read_dict):
@@ -29,6 +29,7 @@ class ReadToLca():
             pass
 
     def compute(self, tree):
+        global NCBI
         if len(self.taxo_hits) == 1:
             ancestor = self.taxo_hits[0]
         else:
@@ -43,29 +44,37 @@ class ReadToLca():
 
 def compute_lca_read(read, read_dict, tree=None):
     r = ReadToLca(read, read_dict)
-    r.ref_to_taxid_single()
-    res = r.compute(tree)
+    r.ref_to_taxid_single(DB)
+    res = r.compute(tree, NCBI)
     return(res)
 
 
 def compute_lca_multi(read_dict, dbname, tree, update, process):
+    
     global DB
-    global NCBI
-    NCBI = ete3.NCBITaxa()
+
     print("Loading Taxonomy database")
     DB = rocksdb.DB(dbname, opts=rocksdb.Options(), read_only=True)
     print("Finished loading Taxonomy database")
 
     if tree:
-        thetree = ete3.Tree(tree, format=1)
+        thetree = Tree(tree, format=1)
     else:
         thetree = None
 
-    compute_lca_partial = partial(
-        compute_lca_read, read_dict=read_dict, tree=thetree)
+    if process >= 2:
+        compute_lca_partial = partial(
+            compute_lca_read, read_dict=read_dict, tree=thetree)
 
-    with multiprocessing.Pool(process) as p:
-        allres = p.map(compute_lca_partial, list(read_dict.keys()))
+        with multiprocessing.Pool(process) as p:
+            allres = p.map(compute_lca_partial, list(read_dict.keys()))
+    else:
+        allres = []
+        print(tree)
+        for read in read_dict:
+            r = ReadToLca(read, read_dict)
+            r.ref_to_taxid_single(DB)
+            allres.append(r.compute(thetree, NCBI))
 
     res = {}
     for r in allres:

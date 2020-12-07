@@ -3,8 +3,7 @@ from sam2lca.ncbi_to_taxid import get_mapping
 from sam2lca.mapfiles import map_db
 from sam2lca.sam_ete import compute_lca_multi
 from sam2lca import utils
-import ete3
-
+from sam2lca.config import NCBI
 
 def sam2lca(sam, mappings, tree, update, process, identity, length, dbdir, output):
     """Performs LCA on SAM/BAM/CRAM alignment file
@@ -19,7 +18,6 @@ def sam2lca(sam, mappings, tree, update, process, identity, length, dbdir, outpu
         length(int): Minimum alignment length
         output(str): Path to sam2lca output file
     """
-    NCBI = ete3.NCBITaxa()
     if update:
         NCBI.update_taxonomy_database()
     if not output:
