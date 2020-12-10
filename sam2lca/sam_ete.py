@@ -2,58 +2,52 @@
 
 import multiprocessing
 from functools import partial
-from sam2lca.config import NCBI
+from sam2lca.config import NCBI, OPTS
 from ete3 import Tree
 import rocksdb
 from tqdm import tqdm
+from multiprocessing.dummy import Pool as ThreadPool
 
-class ReadToLca():
-    def __init__(self, read, read_dict):
-        """
-        Args:
-            read(str): read name
-            read_dict (dict): Read as key, references accessions in list
-        """
-        self.read = read
-        self.mapping = read_dict[read]
+def accession_hits_to_taxid(read_hit_record):
+    """Get TAXID of hits from hit accessions per read
 
-    def ref_to_taxid_single(self):
-        """Get TAXID for a reference accession
-        """
-        # DB: global variable
-        try:
-            taxo_hits = [int(DB.get(bytes(i, encoding='utf8')))
-                         for i in self.mapping]
-            self.taxo_hits = list(set(taxo_hits))
-        except TypeError as e:
-            print(e)
-            pass
+    Args:
+        read_hit_record (tuple): (read_name(str), accession(list))
+    """
+    try:
+        return {read_hit_record[0]: [int(DB.get(bytes(i, encoding='utf8')))
+                        for i in read_hit_record[1]]}
+    except TypeError as e:
+        print(e)
+        pass   
 
-    def compute(self, tree):
-        if len(self.taxo_hits) == 1:
-            ancestor = self.taxo_hits[0]
-        else:
-            if not tree:
-                tree = NCBI.get_topology(
-                    self.taxo_hits, intermediate_nodes=True)
-            ancestor = (tree
-                        .get_common_ancestor([str(i) for i in self.taxo_hits])
-                        .name)
-        return({self.read: int(ancestor)})
+def taxids_to_lca(read_record, tree):
+    """Run LCA on list of TAXID
 
-
-def compute_lca_read(read, read_dict, tree=None):
-    r = ReadToLca(read, read_dict)
-    r.ref_to_taxid_single()
-    res = r.compute(tree)
-    return(res)
+    Args:
+        read_record(tuple): (read_name(str), taxid_hist(list))
+        tree (ete tree): taxid tree
+    """    
+    read = read_record[0]
+    taxids = read_record[1]
+    if len(taxids) == 1:
+        ancestor = taxids[0]
+    else:
+        if not tree:
+            tree = NCBI.get_topology(
+                taxids, intermediate_nodes=True)
+        ancestor = (tree
+                    .get_common_ancestor([str(i) for i in taxids])
+                    .name)
+    return({read:int(ancestor)})
 
 
 def compute_lca_multi(read_dict, dbname, tree, update, process):
     global DB
 
     print("Loading Taxonomy database")
-    DB = rocksdb.DB(dbname, opts=rocksdb.Options(), read_only=True)
+
+    DB = rocksdb.DB(dbname, opts=OPTS, read_only=True)
     print("Finished loading Taxonomy database")
 
     if tree:
@@ -67,18 +61,33 @@ def compute_lca_multi(read_dict, dbname, tree, update, process):
 
     #     with multiprocessing.Pool(process) as p:
     #         allres = p.map(compute_lca_partial, list(read_dict.keys()))
+    # res = {} 
+    # for r in allres:
+    #     res.update(r)
+    # return(res)
     # else:
-    allres = []
-    print("Computing LCA")
-    for read in tqdm(read_dict):
-        r = ReadToLca(read, read_dict)
-        r.ref_to_taxid_single()
-        allres.append(r.compute(thetree))
 
-    res = {}
-    for r in allres:
-        res.update(r)
-    return(res)
+    ancestors = {}
+    print("Computing LCA")
+    if process == 1:
+        for read in tqdm(read_dict.items()):
+            taxid_hits = accession_hits_to_taxid(read)
+            ancestors.update(taxids_to_lca((read[0], taxid_hits[read[0]]), thetree))
+    else:
+        taxid_hits = {}
+        with ThreadPool(process) as p:
+            taxid_res = p.map(accession_hits_to_taxid, read_dict.items())
+        [taxid_hits.update(r) for r in taxid_res]
+        
+        taxids_to_lca_multi = partial(taxids_to_lca, tree=thetree)
+        with multiprocessing.Pool(process) as p:
+            res = p.map(taxids_to_lca_multi, taxid_hits.items())
+        [ancestors.update(r) for r in res]
+
+    return(ancestors)
+    
+
+   
 
 
 if __name__ == "__main__":
