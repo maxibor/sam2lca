@@ -33,7 +33,8 @@ setup(
         'tqdm',
         'xopen',
         'python-rocksdb',
-        'ete3'
+        'ete3',
+        'pandas'
     ],
     packages=find_packages(include=['sam2lca']),
     entry_points={
