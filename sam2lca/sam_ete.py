@@ -2,7 +2,7 @@
 
 import multiprocessing
 from functools import partial
-from sam2lca.config import NCBI, OPTS
+from sam2lca.config import NCBI, OPTS_read
 from ete3 import Tree
 import rocksdb
 from tqdm import tqdm
@@ -19,7 +19,7 @@ def accession_hits_to_taxid(read_hit_record):
                         for i in read_hit_record[1]]}
     except TypeError as e:
         print(e)
-        pass   
+        return None   
 
 def taxids_to_lca(read_record, tree):
     """Run LCA on list of TAXID
@@ -47,7 +47,7 @@ def compute_lca_multi(read_dict, dbname, tree, update, process):
 
     print("Loading Taxonomy database")
 
-    DB = rocksdb.DB(dbname, opts=OPTS, read_only=True)
+    DB = rocksdb.DB(dbname, opts=OPTS_read, read_only=True)
     print("Finished loading Taxonomy database")
 
     if tree:
@@ -72,12 +72,13 @@ def compute_lca_multi(read_dict, dbname, tree, update, process):
     if process == 1:
         for read in tqdm(read_dict.items()):
             taxid_hits = accession_hits_to_taxid(read)
-            ancestors.update(taxids_to_lca((read[0], taxid_hits[read[0]]), thetree))
+            if taxid_hits:
+                ancestors.update(taxids_to_lca((read[0], taxid_hits[read[0]]), thetree))
     else:
         taxid_hits = {}
         with ThreadPool(process) as p:
             taxid_res = p.map(accession_hits_to_taxid, read_dict.items())
-        [taxid_hits.update(r) for r in taxid_res]
+        [taxid_hits.update(r) for r in taxid_res if r]
         
         taxids_to_lca_multi = partial(taxids_to_lca, tree=thetree)
         with multiprocessing.Pool(process) as p:
