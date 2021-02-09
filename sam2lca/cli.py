@@ -11,13 +11,11 @@ from pathlib import Path
 @click.argument('sam', type=click.Path(exists=True))
 @click.option('-m',
               '--mappings',
-              type=click.Choice(['nucl_gb',
-                                 'nucl_wgs',
-                                 'pdb',
+              type=click.Choice(['nucl',
                                  'prot',
                                  'test'],
                                 case_sensitive=False),
-              default='nucl_gb',
+              default='nucl',
               show_default=True,
               help='Mapping type of accession to TAXID')
 @click.option('-i',
