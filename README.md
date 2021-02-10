@@ -9,6 +9,10 @@
 sam2lca myfile.bam
 ```
 
+```bash
+sam2lca --help
+```
+
 ## Installation
 
 ### From source
@@ -20,13 +24,16 @@ conda activate sam2lca
 pip install git+ssh://git@github.com/maxibor/sam2lca.git
 ```
 
-### From conda
+### From Conda
 
-Will be available on conda upon first release
-
+```bash
+conda install -c conda-forge -c bioconda -c maxibor sam2lca
+```
 ### From Pypi
 
-Will be available on Pypi upon first release
+```bash
+pip install sam2lca
+```
 
 ## Documentation
 
