@@ -94,7 +94,7 @@ def mapping_file_to_db(mapdb, mapfile, mapmd5, dbdir):
 
     nlines = wc(f"{dbdir}/{mapfile}")
     i = 0
-    batch_size = min(nlines-1, int(nlines/250))
+    batch_size = min(nlines-1, int(nlines/100))
     with xopen(f"{dbdir}/{mapfile}") as acc:
         for line in tqdm(acc, total=nlines):
             if not line.startswith("accession"):

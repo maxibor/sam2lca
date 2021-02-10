@@ -72,14 +72,20 @@ def compute_lca_multi(read_dict, dbname, tree, update, process):
     if process == 1:
         for read in tqdm(read_dict.items()):
             taxid_hits = accession_hits_to_taxid(read)
+
+            del(DB)
+            
             if taxid_hits:
                 ancestors.update(taxids_to_lca((read[0], taxid_hits[read[0]]), thetree))
+            
     else:
         taxid_hits = {}
         with ThreadPool(process) as p:
             taxid_res = p.map(accession_hits_to_taxid, read_dict.items())
         [taxid_hits.update(r) for r in taxid_res if r]
         
+        del(DB)
+
         taxids_to_lca_multi = partial(taxids_to_lca, tree=thetree)
         with multiprocessing.Pool(process) as p:
             res = p.map(taxids_to_lca_multi, taxid_hits.items())
