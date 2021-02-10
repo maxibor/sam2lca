@@ -90,12 +90,30 @@ def mapping_file_to_db(mapdb, mapfile, mapmd5, dbdir):
         dbdir (str): Mapping file location
     """
 
+    def get_batch_size(nb_entries, nb_batch):
+        """Compute of entries to include per batch
+
+        Args:
+            nb_entries (int): Number of initial entries
+            nb_batch (int): Desired number of batches
+        Returns:
+            (int): Batch size
+        """
+        batch_size = min(nb_entries, int(nb_entries/nb_batch))
+        if batch_size == 0:
+            return(nb_entries)
+        else:
+            return(batch_size)
+
     batch = rocksdb.WriteBatch()
 
     nlines = wc(f"{dbdir}/{mapfile}")
-    i = 0
-    batch_size = min(nlines-1, int(nlines/100))
+    nb_batch = 100
+    
+    batch_size = get_batch_size(nlines-1, nb_batch)
+
     with xopen(f"{dbdir}/{mapfile}") as acc:
+        i = 0
         for line in tqdm(acc, total=nlines):
             if not line.startswith("accession"):
                 acc_line = line.split()
