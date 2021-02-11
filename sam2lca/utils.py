@@ -4,10 +4,6 @@ import rocksdb
 from sam2lca.config import NCBI
 import pandas as pd
 
-def get_script_dir():
-    return(os.path.dirname(os.path.realpath(__file__)))
-
-
 def count_reads_taxid(read_taxid_dict):
     """Returns number of reads matching TAXID
 

@@ -4,7 +4,6 @@ import hashlib
 import os
 import urllib.request as urllib
 from sam2lca.mapfiles import mapfiles, mapmd5, map_db
-from sam2lca.utils import get_script_dir
 from sam2lca.config import OPTS_create
 from xopen import xopen
 from tqdm import tqdm
@@ -55,7 +54,6 @@ def dl_mappings(mapping_url, md5_url, dbdir):
     Returns:
         mapping_fname (str): mapping filename 
     """
-    testdir = get_script_dir() + '/../tests/data/taxonomy/'
 
     md5_fname = md5_url.split("/")[-1]
     mapping_fname = mapping_url.split("/")[-1]
@@ -66,8 +64,8 @@ def dl_mappings(mapping_url, md5_url, dbdir):
             urllib.urlretrieve(mapping_url, filename=f"{dbdir}/{mapping_fname}",
                             reporthook=t.update_to, data=None)
     else:
-        shutil.copy(testdir+mapping_fname, f"{dbdir}/{mapping_fname}")
-        shutil.copy(testdir+md5_fname, f"{dbdir}/{md5_fname}")
+        shutil.copy(mapping_url, f"{dbdir}/{mapping_fname}")
+        shutil.copy(md5_url, f"{dbdir}/{md5_fname}")
     with open(f"{dbdir}/{md5_fname}", 'r') as hf:
         for line in hf:
             md5_hash = line.rstrip().split()[0]

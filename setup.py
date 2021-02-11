@@ -41,5 +41,9 @@ setup(
         'console_scripts': [
             'sam2lca = sam2lca.cli:cli'
         ]
+    },
+    include_package_data=True,
+    package_data={"accession": ["data/test.accession2taxid.gz"],
+                  "md5":["data/test.accession2taxid.gz.md5"]
     }
 )
