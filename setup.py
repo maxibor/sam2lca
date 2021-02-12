@@ -43,7 +43,6 @@ setup(
         ]
     },
     include_package_data=True,
-    package_data={"accession": ["data/test.accession2taxid.gz"],
-                  "md5":["data/test.accession2taxid.gz.md5"]
+    package_data={"sam2lca": ["data/test.accession2taxid.gz", "data/test.accession2taxid.gz.md5"]
     }
 )
