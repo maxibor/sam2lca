@@ -5,12 +5,18 @@
 
 ## Quick start
 
+Quick analyis of sequencing reads aligned to a DNA database
+
 ```bash
-sam2lca myfile.bam
+sam2lca analyze myfile.bam
 ```
+
+See all options
 
 ```bash
 sam2lca --help
+sam2lca update-db --help
+sam2lca analyze --help
 ```
 
 ## Installation

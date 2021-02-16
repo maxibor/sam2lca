@@ -42,7 +42,7 @@ def taxids_to_lca(read_record, tree):
     return({read:int(ancestor)})
 
 
-def compute_lca_multi(read_dict, dbname, tree, update, process):
+def compute_lca_multi(read_dict, dbname, tree, process):
     global DB
 
     print("Loading Taxonomy database")

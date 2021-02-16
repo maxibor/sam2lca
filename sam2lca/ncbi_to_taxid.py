@@ -127,13 +127,13 @@ def mapping_file_to_db(mapdb, mapfile, mapmd5, dbdir):
     os.remove(f"{dbdir}/{mapmd5}")
 
 
-def get_mapping(maptype, update, dbdir):
+def get_mapping(maptype, dbdir, update):
     """Get genbank to taxid mapping
 
     Args:
         maptype(str): Mapping type: nucl or prot
-    Returns:
-        dict: 
+        dbdir(str): Directory to store taxonomy databases
+        update(bool): Update mapping database
     """
     if maptype not in mapfiles.keys():
         print(f"mapping type not in {', '.join(list(mapfiles.keys()))}")
