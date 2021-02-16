@@ -14,6 +14,7 @@ dependencies:
   - pysam=0.16.0.1
   - python=3.8.6
   - python-rocksdb=0.7.0
+  - recommonmark=0.7.1
   - rocksdb=6.13.3
   - setuptools=49.6.0
   - sphinx=3.4.3
@@ -24,6 +25,7 @@ dependencies:
   - sphinxcontrib-jsmath=1.0.1
   - sphinxcontrib-napoleon=0.7
   - sphinxcontrib-qthelp=1.0.3
+  - sphinx_rtd_theme=0.5.1
   - sphinxcontrib-serializinghtml=1.1.4
   - tqdm=4.56.0
   - xopen=1.1.
