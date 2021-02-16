@@ -5,7 +5,7 @@ from sam2lca.sam_ete import compute_lca_multi
 from sam2lca import utils
 from sam2lca.config import NCBI
 from pathlib import Path
-import sys
+
 
 def sam2lca(sam, mappings, tree, process, identity, length, dbdir, output):
     """Performs LCA on SAM/BAM/CRAM alignment file
@@ -38,6 +38,7 @@ def sam2lca(sam, mappings, tree, process, identity, length, dbdir, output):
     taxid_counts = utils.count_reads_taxid(reads_taxid_dict)
     utils.taxid_to_lineage(taxid_counts, output)
 
+
 def update_database(mappings, dbdir, ncbi):
     """Performs LCA on SAM/BAM/CRAM alignment file
 
@@ -51,4 +52,3 @@ def update_database(mappings, dbdir, ncbi):
     if ncbi:
         NCBI.update_taxonomy_database()
     get_mapping(mappings, dbdir=dbdir, update=True)
-
