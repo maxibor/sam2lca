@@ -30,15 +30,23 @@ def taxids_to_lca(read_record, tree):
     """    
     read = read_record[0]
     taxids = read_record[1]
-    if len(taxids) == 1:
+    if len(list(set(taxids))) == 1:
         ancestor = taxids[0]
     else:
         if not tree:
-            tree = NCBI.get_topology(
-                taxids, intermediate_nodes=True)
-        ancestor = (tree
-                    .get_common_ancestor([str(i) for i in taxids])
-                    .name)
+            try:
+                tree = NCBI.get_topology(
+                    taxids, intermediate_nodes=True)
+            except ValueError as e:
+                print(e)
+                print(taxids)
+        try:
+            ancestor = (tree
+                        .get_common_ancestor([str(i) for i in taxids])
+                        .name)
+        except ValueError as e:
+            print(e)
+            print(taxids)
     return({read:int(ancestor)})
 
 
