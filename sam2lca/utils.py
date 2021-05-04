@@ -4,6 +4,7 @@ import rocksdb
 from sam2lca.config import NCBI
 import pandas as pd
 
+
 def count_reads_taxid(read_taxid_dict):
     """Returns number of reads matching TAXID
 
@@ -11,19 +12,22 @@ def count_reads_taxid(read_taxid_dict):
         read_taxid_dict (dict): {read_name(str): TAXID(int)}
     """
     taxid_cnt = {}
+    taxid_reads = {}
     for r in read_taxid_dict:
         if read_taxid_dict[r] not in taxid_cnt:
             taxid_cnt[read_taxid_dict[r]] = 1
+            taxid_reads[read_taxid_dict[r]] = [r]
             continue
         else:
             taxid_cnt[read_taxid_dict[r]] += 1
-    return(taxid_cnt)
+            taxid_reads[read_taxid_dict[r]].append(r)
+    return taxid_cnt, taxid_reads
 
 
 def output_file(sam_path):
     out = os.path.basename(sam_path).split(".")[:-1]
-    out = ".".join(out)+".sam2lca"
-    return(out)
+    out = ".".join(out) + ".sam2lca"
+    return out
 
 
 def check_extension(filename):
@@ -39,9 +43,9 @@ def check_extension(filename):
         Exception: Extension not supported
     """
     extension = filename.split(".")[-1]
-    modes = {'bam': 'rb', 'sam': 'r', 'cram': 'rc'}
+    modes = {"bam": "rb", "sam": "r", "cram": "rc"}
     try:
-        return(modes[extension])
+        return modes[extension]
     except KeyError:
         raise Exception(f"{extension} file extension not supported")
 
@@ -55,19 +59,26 @@ def taxid_to_lineage(taxid_count_dict, output):
         taxid_lineage = NCBI.get_lineage(taxid)
         scinames = NCBI.get_taxid_translator(taxid_lineage)
         ranks = NCBI.get_rank(taxid_lineage)
-        lineage = [{ranks[taxid]:scinames[taxid]} for taxid in taxid_lineage]
-        res[taxid] = {'name': sciname,
-                      'rank': rank,
-                      'count': read_count,
-                      'lineage': lineage}
+        lineage = [{ranks[taxid]: scinames[taxid]} for taxid in taxid_lineage]
+        res[taxid] = {
+            "name": sciname,
+            "rank": rank,
+            "count": read_count,
+            "lineage": lineage,
+        }
 
-    (pd.DataFrame(res).transpose().sort_values("count", ascending=False)
-    .to_csv(f"{output}.csv", index_label='TAXID'))
+    (
+        pd.DataFrame(res)
+        .transpose()
+        .sort_values("count", ascending=False)
+        .to_csv(f"{output}.csv", index_label="TAXID")
+    )
     with open(f"{output}.json", "w") as write_file:
         json.dump(res, write_file)
     print(f"sam2lca results written to:\n- {output}.json\n- {output}.csv")
 
-    return(res)
+    return res
+
 
 def get_db_connection(db_path):
-    return(rocksdb.DB(db_path, opts=rocksdb.Options(), read_only=True))
+    return rocksdb.DB(db_path, opts=rocksdb.Options(), read_only=True)
