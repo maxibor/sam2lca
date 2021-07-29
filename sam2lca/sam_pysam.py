@@ -22,7 +22,7 @@ class Alignment:
         self.al_file = al_file
         self.mode = mode[filetype]
         present_refs = set()
-        for ref_stat in alignment.get_index_statistic():
+        for ref_stat in alignment.get_index_statistics():
             refname = ref_stat[0]
             nb_mapped_reads = ref_stat[1]
             if nb_mapped_reads > 0:
