@@ -7,7 +7,7 @@ from sam2lca.check_conserved_regions import (
     flag_conserved_regions,
     is_in_conserved,
 )
-import multiprocessing
+from tqdm.contrib.concurrent import process_map
 
 
 class Alignment:
@@ -21,7 +21,13 @@ class Alignment:
         alignment = pysam.AlignmentFile(al_file, mode[filetype])
         self.al_file = al_file
         self.mode = mode[filetype]
-        self.refs = alignment.references
+        present_refs = set()
+        for ref_stat in alignment.get_index_statistics():
+            refname = ref_stat[0]
+            nb_mapped_reads = ref_stat[1]
+            if nb_mapped_reads > 0:
+                present_refs.add(refname)
+        self.refs = tuple(present_refs)
         alignment.close()
 
     def __get_reads_single__(self, ref, identity, minlength, check_conserved):
@@ -74,19 +80,18 @@ class Alignment:
         #####################################
         ## Debugging non-parallelized loop ##
         #####################################
-        results = []
-        for ref in self.refs:
-            results.append(
-                self.__get_reads_single__(
-                    ref=ref,
-                    identity=identity,
-                    minlength=minlength,
-                    check_conserved=check_conserved,
-                )
-            )
+        # results = []
+        # for ref in self.refs:
+            # results.append(
+                # self.__get_reads_single__(
+                    # ref=ref,
+                    # identity=identity,
+                    # minlength=minlength,
+                    # check_conserved=check_conserved,
+                # )
+            # )
 
-        # with multiprocessing.Pool(process) as p:
-        #     results = p.map(get_reads_partial, self.refs)
+        results = process_map(get_reads_partial, self.refs, max_workers=process, chunksize=1)
 
         def merge_dict(dict_list):
             """Merge list of dictionaries by key while preserving
