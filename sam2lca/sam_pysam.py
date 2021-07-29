@@ -21,7 +21,10 @@ class Alignment:
         alignment = pysam.AlignmentFile(al_file, mode[filetype])
         self.al_file = al_file
         self.mode = mode[filetype]
-        self.refs = alignment.references
+        present_refs = set()
+        for read in alignment:
+            set.add(read.reference_name)
+        self.refs = tuple(present_refs)
         alignment.close()
 
     def __get_reads_single__(self, ref, identity, minlength, check_conserved):
