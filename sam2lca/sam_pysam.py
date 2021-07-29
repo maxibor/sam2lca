@@ -22,8 +22,11 @@ class Alignment:
         self.al_file = al_file
         self.mode = mode[filetype]
         present_refs = set()
-        for read in alignment:
-            set.add(read.reference_name)
+        for ref_stat in alignment.get_index_statistic():
+            refname = ref_stat[0]
+            nb_mapped_reads = ref_stat[1]
+            if nb_mapped_reads > 0:
+                present_refs.add(refname)
         self.refs = tuple(present_refs)
         alignment.close()
 
