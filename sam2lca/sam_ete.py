@@ -6,7 +6,7 @@ from sam2lca.config import NCBI, OPTS_read
 from ete3 import Tree
 import rocksdb
 from tqdm import tqdm
-from multiprocessing.dummy import Pool as ThreadPool
+from tqdm.contrib.concurrent import process_map
 
 def accession_hits_to_taxid(read_hit_record):
     """Get TAXID of hits from hit accessions per read
@@ -88,16 +88,13 @@ def compute_lca_multi(read_dict, dbname, tree, process):
             
     else:
         taxid_hits = {}
-        with ThreadPool(process) as p:
-            taxid_res = p.map(accession_hits_to_taxid, read_dict.items())
+        taxid_res = process_map(accession_hits_to_taxid, read_dict.items(), chunksize=1, max_workers=process)
         [taxid_hits.update(r) for r in taxid_res if r]
         
         del(DB)
 
-        taxids_to_lca_multi = partial(taxids_to_lca, tree=thetree)
-        with multiprocessing.Pool(process) as p:
-            res = p.map(taxids_to_lca_multi, taxid_hits.items())
-        [ancestors.update(r) for r in res]
+        for taxid_res in tqdm(taxid_hits.items()):
+            ancestors.update(taxids_to_lca(taxid_res, thetree))
 
     return(ancestors)
     
