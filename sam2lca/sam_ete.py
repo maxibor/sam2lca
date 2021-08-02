@@ -21,15 +21,13 @@ def accession_hits_to_taxid(read_hit_record):
         print(e)
         return None   
 
-def taxids_to_lca(read_record, tree):
+def taxids_to_lca(taxids, tree):
     """Run LCA on list of TAXID
 
     Args:
-        read_record(tuple): (read_name(str), taxid_hist(list))
+        taxids (list): list of taxids
         tree (ete tree): taxid tree
-    """    
-    read = read_record[0]
-    taxids = read_record[1]
+    """
     if len(list(set(taxids))) == 1:
         ancestor = taxids[0]
     else:
@@ -47,7 +45,7 @@ def taxids_to_lca(read_record, tree):
         except ValueError as e:
             print(e)
             print(taxids)
-    return({read:int(ancestor)})
+    return({",".join([str(t) for t in taxids]): int(ancestor)})
 
 
 def compute_lca_multi(read_dict, dbname, tree, process):
@@ -90,16 +88,31 @@ def compute_lca_multi(read_dict, dbname, tree, process):
         taxid_hits = {}
         taxid_res = process_map(accession_hits_to_taxid, read_dict.items(), chunksize=1, max_workers=process)
         [taxid_hits.update(r) for r in taxid_res if r]
-        
+
         del(DB)
 
-        for taxid_res in tqdm(taxid_hits.items()):
-            ancestors.update(taxids_to_lca(taxid_res, thetree))
+        # Summarise reads with identical taxid combinations
+        taxid_combs = {}
+        for read, taxids in taxid_hits.items():
+            taxids_hash = ",".join([str(t) for t in taxids])
+            if taxids_hash not in taxid_combs:
+                taxid_combs[taxids_hash] = [read]
+            else:
+                taxid_combs[taxids_hash].append(read)
+
+        # Infer ancestors on unique combinations
+        unique_taxid_hashs = list(set(taxid_combs.keys()))
+        print(f"{len(unique_taxid_hashs)} unique combinations of taxa were found.")
+        lca = {}
+        for taxid_res in tqdm(unique_taxid_hashs):
+            lca.update(taxids_to_lca([int(t) for t in taxid_res.split(",")], thetree))
+
+        # Extract for each read ancestor taxid
+        for taxids_hash, reads in taxid_combs.items():
+            for read in reads:
+                ancestors.update({read: lca[taxids_hash]})
 
     return(ancestors)
-    
-
-   
 
 
 if __name__ == "__main__":
