@@ -34,7 +34,8 @@ setup(
         'xopen',
         'python-rocksdb',
         'ete3',
-        'pandas'
+        'pandas',
+        'ordered_set'
     ],
     packages=find_packages(include=['sam2lca']),
     entry_points={

@@ -6,31 +6,33 @@ from sam2lca.config import NCBI, OPTS_read
 from ete3 import Tree
 import rocksdb
 from tqdm import tqdm
-from multiprocessing.dummy import Pool as ThreadPool
+from tqdm.contrib.concurrent import process_map
+from ordered_set import OrderedSet
 
 def accession_hits_to_taxid(read_hit_record):
     """Get TAXID of hits from hit accessions per read
 
     Args:
         read_hit_record (tuple): (read_name(str), accession(list))
+    Returns:
+        dict: {read_name(str): (tuple of taxids)}
     """
     try:
-        return {read_hit_record[0]: [int(DB.get(bytes(i, encoding='utf8')))
-                        for i in read_hit_record[1]]}
+        return {read_hit_record[0]: tuple(OrderedSet(sorted([int(DB.get(bytes(i, encoding='utf8')))
+                        for i in read_hit_record[1]])))}
     except TypeError as e:
         print(e)
         return None   
 
-def taxids_to_lca(read_record, tree):
+def taxids_to_lca(taxids, tree):
     """Run LCA on list of TAXID
 
     Args:
-        read_record(tuple): (read_name(str), taxid_hist(list))
+        taxids (set): tuple of taxids
         tree (ete tree): taxid tree
-    """    
-    read = read_record[0]
-    taxids = read_record[1]
-    if len(list(set(taxids))) == 1:
+    """
+    taxids = taxids
+    if len(taxids) == 1:
         ancestor = taxids[0]
     else:
         if not tree:
@@ -41,13 +43,15 @@ def taxids_to_lca(read_record, tree):
                 print(e)
                 print(taxids)
         try:
+            # print(list(map(str, taxids[1])))
+            print(tree.get_common_ancestor(list(map(str, taxids))).name)
             ancestor = (tree
-                        .get_common_ancestor([str(i) for i in taxids])
+                        .get_common_ancestor(list(map(str, taxids)))
                         .name)
+            
         except ValueError as e:
             print(e)
-            print(taxids)
-    return({read:int(ancestor)})
+    return({taxids: int(ancestor)})
 
 
 def compute_lca_multi(read_dict, dbname, tree, process):
@@ -79,30 +83,43 @@ def compute_lca_multi(read_dict, dbname, tree, process):
     print("Computing LCA")
     if process == 1:
         for read in tqdm(read_dict.items()):
+            # Getting TAXIDs the of accesions mapped to each read
             taxid_hits = accession_hits_to_taxid(read)
 
             del(DB)
             
             if taxid_hits:
-                ancestors.update(taxids_to_lca((read[0], taxid_hits[read[0]]), thetree))
+                # Getting the LCA of these TAXIDs
+                ancestors.update(taxids_to_lca(taxid_hits[read[0]], thetree))
             
     else:
         taxid_hits = {}
-        with ThreadPool(process) as p:
-            taxid_res = p.map(accession_hits_to_taxid, read_dict.items())
+        taxid_res = process_map(accession_hits_to_taxid, read_dict.items(), chunksize=1, max_workers=process)
+        # Creating dictornary with read name as key and tuple of TAXIDs as value
         [taxid_hits.update(r) for r in taxid_res if r]
-        
+
         del(DB)
 
-        taxids_to_lca_multi = partial(taxids_to_lca, tree=thetree)
-        with multiprocessing.Pool(process) as p:
-            res = p.map(taxids_to_lca_multi, taxid_hits.items())
-        [ancestors.update(r) for r in res]
+        # Summarise reads with identical taxid combinations
+        taxid_combs = {} #taxids as keys, reads having mapping to these taxids as values
+        for read, taxids in taxid_hits.items():
+            if taxids not in taxid_combs:
+                    taxid_combs[taxids] = [read]
+            else:
+                taxid_combs[taxids].append(read)
+
+        # Infer ancestors on unique combinations
+        print(f"{len(taxid_combs)} unique combinations of taxa were found.")
+        lca = {}
+        for taxid_res in tqdm(taxid_combs): #taxids as key, taxid of LCA as value
+            lca.update(taxids_to_lca(taxid_res, thetree))
+
+        # Extract for each read ancestor taxid
+        for taxids, reads in taxid_combs.items():
+            for read in reads:
+                ancestors.update({read: lca[taxids]})
 
     return(ancestors)
-    
-
-   
 
 
 if __name__ == "__main__":
