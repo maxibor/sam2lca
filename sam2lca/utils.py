@@ -75,7 +75,7 @@ def taxid_to_lineage(taxid_count_dict, output):
     )
     with open(f"{output}.json", "w") as write_file:
         json.dump(res, write_file)
-    logging.info(f"Step 5/6: writing sam2lca results to:\n* {output}.json\n* {output}.csv")
+    logging.info(f"Step 6/6: writing sam2lca results to:\n* {output}.json\n* {output}.csv")
 
     return res
 
