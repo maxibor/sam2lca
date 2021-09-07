@@ -8,8 +8,24 @@ import rocksdb
 from tqdm import tqdm
 from tqdm.contrib.concurrent import process_map
 from ordered_set import OrderedSet
+import logging
 
-def accession_hits_to_taxid(read_hit_record):
+def accession_to_taxid_lookup(accession_list):
+    """Get TAXID of hits from hit accessions per read
+
+    Args:
+        accession list (list): list of unique accession numbers
+    Returns:
+        dict: {accession: taxid}
+    """
+    try:
+        return {i: int(DB.get(bytes(i, encoding='utf8'))) for i in tqdm(accession_list)}
+    except TypeError as e:
+        print(e)
+        return None   
+
+
+def read_accession_to_taxid(read_hit_record, accession_taxid_dict):
     """Get TAXID of hits from hit accessions per read
 
     Args:
@@ -18,11 +34,11 @@ def accession_hits_to_taxid(read_hit_record):
         dict: {read_name(str): (tuple of taxids)}
     """
     try:
-        return {read_hit_record[0]: tuple(OrderedSet(sorted([int(DB.get(bytes(i, encoding='utf8')))
-                        for i in read_hit_record[1]])))}
+        return {read_hit_record[0]: tuple(OrderedSet([accession_taxid_dict[i] for i in read_hit_record[1]]))}
     except TypeError as e:
         print(e)
-        return None   
+        return None  
+
 
 def taxids_to_lca(taxids, tree):
     """Run LCA on list of TAXID
@@ -41,10 +57,8 @@ def taxids_to_lca(taxids, tree):
                     taxids, intermediate_nodes=True)
             except ValueError as e:
                 print(e)
-                print(taxids)
         try:
             # print(list(map(str, taxids[1])))
-            print(tree.get_common_ancestor(list(map(str, taxids))).name)
             ancestor = (tree
                         .get_common_ancestor(list(map(str, taxids)))
                         .name)
@@ -54,13 +68,17 @@ def taxids_to_lca(taxids, tree):
     return({taxids: int(ancestor)})
 
 
-def compute_lca_multi(read_dict, dbname, tree, process):
+def compute_lca_multi(read_dict, accession_list, dbname, tree, process):
     global DB
 
-    print("Loading Taxonomy database")
+    logging.info("Step 2/6: Loading Taxonomy database")
 
     DB = rocksdb.DB(dbname, opts=OPTS_read, read_only=True)
-    print("Finished loading Taxonomy database")
+    logging.info("* Finished loading Taxonomy database")
+    logging.info("Step 3/6: Converting accession numbers to TAXIDs")
+    accession2taxid = accession_to_taxid_lookup(accession_list)
+    del(DB)
+
 
     if tree:
         thetree = Tree(tree, format=1)
@@ -80,25 +98,22 @@ def compute_lca_multi(read_dict, dbname, tree, process):
     # else:
 
     ancestors = {}
-    print("Computing LCA")
+    logging.info("Step 4/6: Getting unique TAXID combinations")
     if process == 1:
         for read in tqdm(read_dict.items()):
             # Getting TAXIDs the of accesions mapped to each read
-            taxid_hits = accession_hits_to_taxid(read)
-
-            del(DB)
-            
+            taxid_hits = read_accession_to_taxid(read, accession2taxid)
+            logging.info("Step 5/6: Computing LCA")
             if taxid_hits:
                 # Getting the LCA of these TAXIDs
                 ancestors.update(taxids_to_lca(taxid_hits[read[0]], thetree))
             
     else:
         taxid_hits = {}
-        taxid_res = process_map(accession_hits_to_taxid, read_dict.items(), chunksize=1, max_workers=process)
+        read_accession_to_taxid_partial = partial(read_accession_to_taxid, accession_taxid_dict = accession2taxid)
+        taxid_res = process_map(read_accession_to_taxid_partial, read_dict.items(), chunksize=1, max_workers=process)
         # Creating dictornary with read name as key and tuple of TAXIDs as value
         [taxid_hits.update(r) for r in taxid_res if r]
-
-        del(DB)
 
         # Summarise reads with identical taxid combinations
         taxid_combs = {} #taxids as keys, reads having mapping to these taxids as values
@@ -109,11 +124,11 @@ def compute_lca_multi(read_dict, dbname, tree, process):
                 taxid_combs[taxids].append(read)
 
         # Infer ancestors on unique combinations
-        print(f"{len(taxid_combs)} unique combinations of taxa were found.")
+        logging.info(f"* {len(taxid_combs)} unique combinations of taxa were found.")
         lca = {}
+        logging.info("Step 5/6: Computing LCA")
         for taxid_res in tqdm(taxid_combs): #taxids as key, taxid of LCA as value
             lca.update(taxids_to_lca(taxid_res, thetree))
-
         # Extract for each read ancestor taxid
         for taxids, reads in taxid_combs.items():
             for read in reads:

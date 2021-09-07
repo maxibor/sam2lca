@@ -3,7 +3,7 @@ import json
 import rocksdb
 from sam2lca.config import NCBI
 import pandas as pd
-
+import logging
 
 def count_reads_taxid(read_taxid_dict):
     """Returns number of reads matching TAXID
@@ -75,7 +75,7 @@ def taxid_to_lineage(taxid_count_dict, output):
     )
     with open(f"{output}.json", "w") as write_file:
         json.dump(res, write_file)
-    print(f"sam2lca results written to:\n- {output}.json\n- {output}.csv")
+    logging.info(f"Step 5/6: writing sam2lca results to:\n* {output}.json\n* {output}.csv")
 
     return res
 
