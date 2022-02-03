@@ -3,6 +3,7 @@
 import click
 from sam2lca import __version__
 from sam2lca.main import sam2lca, update_database
+from sam2lca.mapfiles import mapfiles
 from pathlib import Path
 
 
@@ -12,7 +13,7 @@ from pathlib import Path
 @click.option(
     "-m",
     "--mappings",
-    type=click.Choice(["nucl", "prot", "test"], case_sensitive=False),
+    type=click.Choice(list(mapfiles.keys()), case_sensitive=False),
     default="nucl",
     show_default=True,
     help="Mapping type of accession to TAXID",

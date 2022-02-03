@@ -18,6 +18,7 @@ __ homepage_
    README
    API
    CLI
+   databases
    output
    
 
