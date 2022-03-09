@@ -83,6 +83,12 @@ def cli(ctx, mappings, dbdir):
     default=None,
     help="sam2lca output file",
 )
+@click.option(
+    "-b",
+    "--bam_out",
+    is_flag=True,
+    help="Write BAM output file with XT tag for TAXID",
+)
 def analyze(ctx, no_args_is_help=True, **kwargs):
     """\b
     Run the sam2lca analysis

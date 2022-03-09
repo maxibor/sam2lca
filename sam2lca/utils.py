@@ -5,6 +5,7 @@ from sam2lca.config import NCBI
 import pandas as pd
 import logging
 
+
 def count_reads_taxid(read_taxid_dict):
     """Returns number of reads matching TAXID
 
@@ -26,7 +27,8 @@ def count_reads_taxid(read_taxid_dict):
 
 def output_file(sam_path):
     out = os.path.basename(sam_path).split(".")[:-1]
-    out = ".".join(out) + ".sam2lca"
+    out = {"sam2lca": ".".join(out) + ".sam2lca", "bam": ".".join(out) + ".bam"}
+
     return out
 
 
@@ -67,15 +69,20 @@ def taxid_to_lineage(taxid_count_dict, output):
             "lineage": lineage,
         }
 
-    (
-        pd.DataFrame(res)
-        .transpose()
-        .sort_values("count", ascending=False)
-        .to_csv(f"{output}.csv", index_label="TAXID")
-    )
+        df = pd.DataFrame(res).transpose().sort_values("count", ascending=False)
+        df["lineage"] = (
+            df["lineage"]
+            .astype(str)
+            .str.replace("[\[\]\{\}]", "")
+            .str.replace(", ", " - ")
+        )
+        df.to_csv(f"{output}.csv", index_label="TAXID")
+
     with open(f"{output}.json", "w") as write_file:
         json.dump(res, write_file)
-    logging.info(f"Step 6/6: writing sam2lca results to:\n* {output}.json\n* {output}.csv")
+    logging.info(
+        f"Step 6/6: writing sam2lca results to:\n* {output}.json\n* {output}.csv"
+    )
 
     return res
 
