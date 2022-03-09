@@ -1,4 +1,3 @@
-from nbformat import write
 from sam2lca.sam_pysam import Alignment
 from sam2lca.ncbi_to_taxid import get_mapping
 from sam2lca.mapfiles import map_db
