@@ -20,6 +20,7 @@ __ homepage_
    CLI
    databases
    output
+   tutorial
    
 
 

@@ -37,4 +37,4 @@ jobs:
         shell: bash -l {0}
         run: |
           sam2lca -m test update-db
-          sam2lca -m test analyze -t tests/data/taxonomy/test.tree tests/data/aligned.sorted.bam
+          sam2lca -m test analyze -b -t tests/data/taxonomy/test.tree tests/data/aligned.sorted.bam

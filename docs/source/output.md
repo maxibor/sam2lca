@@ -137,13 +137,13 @@ Example:
 - `name`: Name of the taxon
 - `rank`: Taxonomic rank
 - `count`: Number of reads assigned to this taxon
-- `lineage`: Taxonomic lineage of this taxon
+- `lineage`: Taxonomic lineage of this taxon, each taxonomic level being separated by a `-` sign.
 
 ```python
-TAXID, name, rank, count, lineage
-543, Enterobacteriaceae, family, 2242, "[{'no rank': 'root'},  {'no rank': 'cellular organisms'},  {'superkingdom': 'Bacteria'},  {'phylum': 'Proteobacteria'},  {'class': 'Gammaproteobacteria'},  {'order': 'Enterobacterales'},  {'family': 'Enterobacteriaceae'}]"
-511145, Escherichia coli str. K-12 substr. MG1655, no rank, 385, "[{'no rank': 'root'},  {'no rank': 'cellular organisms'},  {'superkingdom': 'Bacteria'},  {'phylum': 'Proteobacteria'},  {'class': 'Gammaproteobacteria'},  {'order': 'Enterobacterales'},  {'family': 'Enterobacteriaceae'},  {'genus': 'Escherichia'},  {'species': 'Escherichia coli'},  {'no rank': 'Escherichia coli K-12'},  {'no rank': 'Escherichia coli str. K-12 substr. MG1655'}]"
-300267, Shigella dysenteriae Sd197, no rank, 248, "[{'no rank': 'root'},  {'no rank': 'cellular organisms'},  {'superkingdom': 'Bacteria'},  {'phylum': 'Proteobacteria'},  {'class': 'Gammaproteobacteria'},  {'order': 'Enterobacterales'},  {'family': 'Enterobacteriaceae'},  {'genus': 'Shigella'},  {'species': 'Shigella dysenteriae'},  {'no rank': 'Shigella dysenteriae Sd197'}]"
+TAXID,name,rank,count,lineage
+543,Enterobacteriaceae,family,2152,'no rank': 'root' - 'no rank': 'cellular organisms' - 'superkingdom': 'Bacteria' - 'phylum': 'Proteobacteria' - 'class': 'Gammaproteobacteria' - 'order': 'Enterobacterales' - 'family': 'Enterobacteriaceae'
+511145,Escherichia coli str. K-12 substr. MG1655,no rank,385,'no rank': 'root' - 'no rank': 'cellular organisms' - 'superkingdom': 'Bacteria' - 'phylum': 'Proteobacteria' - 'class': 'Gammaproteobacteria' - 'order': 'Enterobacterales' - 'family': 'Enterobacteriaceae' - 'genus': 'Escherichia' - 'species': 'Escherichia coli' - 'strain': 'Escherichia coli K-12' - 'no rank': 'Escherichia coli str. K-12 substr. MG1655'
+300267,Shigella dysenteriae Sd197,strain,338,'no rank': 'root' - 'no rank': 'cellular organisms' - 'superkingdom': 'Bacteria' - 'phylum': 'Proteobacteria' - 'class': 'Gammaproteobacteria' - 'order': 'Enterobacterales' - 'family': 'Enterobacteriaceae' - 'genus': 'Shigella' - 'species': 'Shigella dysenteriae' - 'strain': 'Shigella dysenteriae Sd197'
 ```
 
 
