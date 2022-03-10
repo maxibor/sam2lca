@@ -11,7 +11,7 @@ For this tutorial, a dedicated conda-environment is available to ease the reprod
 Download environment
 
 ```bash
-$ wget 
+$ wget https://raw.githubusercontent.com/maxibor/sam2lca/master/docs/tutorial/environment.yaml
 ```
 
 Installing and activating environment
@@ -46,8 +46,8 @@ $ bowtie2-build angiosperms353_markers.fa angiosperms353
 - Downloading the paired-end DNA sequencing compressed `fastq` files
 
 ```bash
-$ wget 
-$ wget
+$ wget https://raw.githubusercontent.com/maxibor/sam2lca/master/docs/tutorial/data/metagenome.1.fastq.gz
+$ wget https://raw.githubusercontent.com/maxibor/sam2lca/master/docs/tutorial/data/metagenome.2.fastq.gz
 ```
 
 - Performing adapter-clipping and quality trimming with [fastp](https://github.com/OpenGene/fastp)
