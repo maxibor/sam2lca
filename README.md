@@ -43,4 +43,4 @@ pip install sam2lca
 
 ## Documentation
 
-The documentation is available here: [sam2lca.readthedocs.io](https://sam2lca.readthedocs.io)
+The documentation of sam2lca, including tutorials, is available here: [sam2lca.readthedocs.io](https://sam2lca.readthedocs.io)
