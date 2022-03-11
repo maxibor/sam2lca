@@ -31,13 +31,14 @@ def read_accession_to_taxid(read_hit_record, accession_taxid_dict):
 
     Args:
         read_hit_record (tuple): (read_name(str), accession(list))
+        accession_taxid_dict(dict): {accession(str): taxid(int)}
     Returns:
-        dict: {read_name(str): (tuple of taxids)}
+        dict: {read_name(str): (frozenset of taxids)}
     """
     try:
         return {
-            read_hit_record[0]: tuple(
-                OrderedSet([accession_taxid_dict[i] for i in read_hit_record[1]])
+            read_hit_record[0]: frozenset(
+                accession_taxid_dict[i] for i in read_hit_record[1]
             )
         }
     except TypeError as e:
@@ -125,7 +126,7 @@ def compute_lca_multi(read_dict, accession_list, dbname, tree, process):
 
         # Summarise reads with identical taxid combinations
         taxid_combs = (
-            {}
+            dict()
         )  # taxids as keys, reads having mapping to these taxids as values
         for read, taxids in taxid_hits.items():
             if taxids not in taxid_combs:
