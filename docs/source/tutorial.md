@@ -1,14 +1,14 @@
 # Tutorial
 
-**Using [sam2lca](https://github.com/maxibor/sam2lca) to identify a plant taxon from a `fastq` sequencing files.**
+**Using [sam2lca](https://github.com/maxibor/sam2lca) to identify plant taxa from `fastq` sequencing files.**
 
-In this tutorial, we'll use the [Angiosperms353](https://academic.oup.com/sysbio/article/68/4/594/5237557) plant markers database, which consists of up to 353 universal Angiosperms (flowering plants) gene markers, derived from the [1000 plant transcriptomes](https://www.nature.com/articles/s41586-019-1693-2) project, to identify a the plant species present in our sequencing data.
+In this tutorial, we'll use the [Angiosperms353](https://academic.oup.com/sysbio/article/68/4/594/5237557) plant markers database, which consists of up to 353 universal Angiosperms (flowering plants) gene markers, derived from the [1000 plant transcriptomes](https://www.nature.com/articles/s41586-019-1693-2) project, to identify the plant species present in our sequencing data.
 
 ## Installing all tools for this tutorial
 
 For this tutorial, a dedicated conda-environment is available to ease the reproducibility.
 
-Download environment
+Downloading environment
 
 ```bash
 $ wget https://raw.githubusercontent.com/maxibor/sam2lca/master/docs/tutorial/environment.yaml
@@ -33,15 +33,17 @@ $ gunzip angiosperms353_markers.fa.gz
 
 ## Indexing the database with Bowtie2
 
-In this tutorial, we're going to work with the [Bowtie2](https://github.com/BenLangmead/bowtie2) read aligner, but other aligners like [BWA](http://bio-bwa.sourceforge.net/) are also just fine.
+In this tutorial, we're going to use [Bowtie2](https://github.com/BenLangmead/bowtie2) to align the sequencing data, but other aligners, such as [BWA](http://bio-bwa.sourceforge.net/), also work just fine.
 
-Before doing any alignment, we need to index the angiosperms353 database with bowtie2
+Before being able to do any alignment, we need to index the angiosperms353 database with bowtie2
 
 ```bash
 $ bowtie2-build angiosperms353_markers.fa angiosperms353
 ```
 
 ## Preparing `fastq` sequencing files
+
+Next, we will prepare the sequencing data.
 
 - Downloading the paired-end DNA sequencing compressed `fastq` files
 
@@ -69,7 +71,7 @@ $ samtools index metagenome.sorted.bam
 
 ## Running sam2lca
 
-Once we have our alignment file, here in `bam` format, we can now run [sam2lca](https://github.com/maxibor/sam2lca) to identify which plants shed some of its DNA in our sequencing file.
+Once we have our alignment file, here in `bam` format, we can now run [sam2lca](https://github.com/maxibor/sam2lca) to identify the lowest common ancestor species for the aligned reads and thus infer which plants shed some of its DNA in our sequencing file.
 
 First, we need to set up the sam2lca database for *plant markers*
 

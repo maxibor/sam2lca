@@ -28,7 +28,7 @@ def sam2lca(
     if not output:
         output = utils.output_file(sam)
     utils.check_extension(sam)
-    logging.info("Step 1/6: Parsing alignment file")
+    logging.info("Step 1/6: Parsing the alignment file")
     al = Alignment(al_file=sam)
     read_dict = al.get_reads(
         process=process, identity=identity, minlength=length, check_conserved=conserved

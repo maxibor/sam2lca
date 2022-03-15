@@ -73,10 +73,10 @@ def taxids_to_lca(taxids, tree):
 def compute_lca_multi(read_dict, accession_list, dbname, tree, process):
     global DB
 
-    logging.info("Step 2/6: Loading Taxonomy database")
+    logging.info("Step 2/6: Loading the taxonomy database")
 
     DB = rocksdb.DB(dbname, opts=OPTS_read, read_only=True)
-    logging.info("* Finished loading Taxonomy database")
+    logging.info("* Finished loading the taxonomy database")
     logging.info("Step 3/6: Converting accession numbers to TAXIDs")
     accession2taxid = accession_to_taxid_lookup(accession_list)
     del DB
