@@ -1,4 +1,3 @@
-import pickle
 import sys
 import hashlib
 import os
@@ -10,6 +9,7 @@ from tqdm import tqdm
 from subprocess import check_output
 import rocksdb
 import shutil
+
 
 class TqdmUpTo(tqdm):
     """Provides `update_to(n)` which uses `tqdm.update(delta_n)`."""
@@ -52,21 +52,25 @@ def dl_mappings(mapping_url, md5_url, dbdir):
         md5_url (str): URL of md5 mapping file
         dbdir (str): path to mapping local directory
     Returns:
-        mapping_fname (str): mapping filename 
+        mapping_fname (str): mapping filename
     """
 
     md5_fname = md5_url.split("/")[-1]
     mapping_fname = mapping_url.split("/")[-1]
-    if mapping_fname != 'test.accession2taxid.gz':
+    if mapping_fname != "test.accession2taxid.gz":
         urllib.urlretrieve(md5_url, f"{dbdir}/{md5_fname}")
 
-        with TqdmUpTo(unit='B', unit_scale=True, miniters=1, desc=mapping_fname) as t:
-            urllib.urlretrieve(mapping_url, filename=f"{dbdir}/{mapping_fname}",
-                            reporthook=t.update_to, data=None)
+        with TqdmUpTo(unit="B", unit_scale=True, miniters=1, desc=mapping_fname) as t:
+            urllib.urlretrieve(
+                mapping_url,
+                filename=f"{dbdir}/{mapping_fname}",
+                reporthook=t.update_to,
+                data=None,
+            )
     else:
         shutil.copy(mapping_url, f"{dbdir}/{mapping_fname}")
         shutil.copy(md5_url, f"{dbdir}/{md5_fname}")
-    with open(f"{dbdir}/{md5_fname}", 'r') as hf:
+    with open(f"{dbdir}/{md5_fname}", "r") as hf:
         for line in hf:
             md5_hash = line.rstrip().split()[0]
     file_hash = md5(f"{dbdir}/{mapping_fname}")
@@ -75,7 +79,7 @@ def dl_mappings(mapping_url, md5_url, dbdir):
     except AssertionError:
         print(f"Error while downloading {mapping_url}, please try again")
         sys.exit(1)
-    return(mapping_fname)
+    return mapping_fname
 
 
 def mapping_file_to_db(mapdb, mapfile, mapmd5, dbdir):
@@ -97,18 +101,18 @@ def mapping_file_to_db(mapdb, mapfile, mapmd5, dbdir):
         Returns:
             (int): Batch size
         """
-        batch_size = min(nb_entries, int(nb_entries/nb_batch))
+        batch_size = min(nb_entries, int(nb_entries / nb_batch))
         if batch_size == 0:
-            return(nb_entries)
+            return nb_entries
         else:
-            return(batch_size)
+            return batch_size
 
     batch = rocksdb.WriteBatch()
 
     nlines = wc(f"{dbdir}/{mapfile}")
     nb_batch = 100
-    
-    batch_size = get_batch_size(nlines-1, nb_batch)
+
+    batch_size = get_batch_size(nlines - 1, nb_batch)
 
     with xopen(f"{dbdir}/{mapfile}") as acc:
         i = 0
@@ -117,8 +121,9 @@ def mapping_file_to_db(mapdb, mapfile, mapmd5, dbdir):
                 acc_line = line.split()
                 acc_num = acc_line[1]
                 acc_taxid = acc_line[2]
-                batch.put(bytes(acc_num, encoding='utf8'),
-                        bytes(acc_taxid, encoding='utf8'))
+                batch.put(
+                    bytes(acc_num, encoding="utf8"), bytes(acc_taxid, encoding="utf8")
+                )
             if i % batch_size == 0:
                 DATABASE.write(batch)
                 batch = rocksdb.WriteBatch()
@@ -155,20 +160,27 @@ def get_mapping(maptype, dbdir, update):
                 except FileNotFoundError as e:
                     print(f"No local copy of {mapfile}")
 
-                print(f"Downloading '{maptype}' acc2tax mapping file [{i+1}/{nb_files}]")
-                mapname = dl_mappings(mapping_url=mapfiles[maptype][i],
-                                    md5_url=mapmd5[maptype][i], dbdir=dbdir)
+                print(
+                    f"Downloading '{maptype}' acc2tax mapping file [{i+1}/{nb_files}]"
+                )
+                mapname = dl_mappings(
+                    mapping_url=mapfiles[maptype][i],
+                    md5_url=mapmd5[maptype][i],
+                    dbdir=dbdir,
+                )
             else:
                 mapname = mapfiles[maptype][i].split("/")[-1]
             print("Inserting mappings into database")
-            mapping_file_to_db(mapfile=mapname,
-                            mapdb=map_db[maptype],
-                            dbdir=dbdir,
-                            mapmd5=mapmd5[maptype][i].split("/")[-1])
+            mapping_file_to_db(
+                mapfile=mapname,
+                mapdb=map_db[maptype],
+                dbdir=dbdir,
+                mapmd5=mapmd5[maptype][i].split("/")[-1],
+            )
 
     # DB = rocksdb.DB(f"{dbdir}/{map_db[maptype]}", opts=rocksdb.Options(), read_only=True)
     # return(f"{dbdir}/{map_db[maptype]}")
 
 
 if __name__ == "__main__":
-    allmaps = get_mapping('pdb')
+    allmaps = get_mapping("pdb")

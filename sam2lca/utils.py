@@ -4,6 +4,9 @@ import rocksdb
 from sam2lca.config import NCBI
 import pandas as pd
 import logging
+import warnings
+
+warnings.simplefilter(action="ignore", category=FutureWarning)
 
 
 def count_reads_taxid(read_taxid_dict):

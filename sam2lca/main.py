@@ -25,14 +25,6 @@ def sam2lca(
         output(str): Path to sam2lca output file
         bam_out(bool): Write BAM output file with XT tag for TAXID
     """
-    if not output:
-        output = utils.output_file(sam)
-    utils.check_extension(sam)
-    logging.info("Step 1/6: Parsing alignment file")
-    al = Alignment(al_file=sam)
-    read_dict = al.get_reads(
-        process=process, identity=identity, minlength=length, check_conserved=conserved
-    )
     acc2tax_db = f"{dbdir}/{map_db[mappings]}"
     p = Path(acc2tax_db)
     if not p.exists():
@@ -40,7 +32,17 @@ def sam2lca(
             f"\t'{acc2tax_db}' database seems to be missing, I'm creating it for you."
         )
         get_mapping(mappings, dbdir=dbdir, update=False)
-    reads_taxid_dict = compute_lca_multi(read_dict, al.refs, acc2tax_db, tree, process)
+
+    if not output:
+        output = utils.output_file(sam)
+    utils.check_extension(sam)
+    al = Alignment(al_file=sam)
+    al.get_refs_taxid(acc2tax_db)
+    read_dict = al.get_reads(
+        process=process, identity=identity, minlength=length, check_conserved=conserved
+    )
+
+    reads_taxid_dict = compute_lca_multi(read_dict, tree, process)
     taxid_counts, taxid_reads = utils.count_reads_taxid(reads_taxid_dict)
     utils.taxid_to_lineage(taxid_counts, output["sam2lca"])
     if bam_out:

@@ -2,12 +2,32 @@
 
 import pysam
 from functools import partial
+from multiprocessing import Manager
 from sam2lca.check_conserved_regions import (
     compute_coverage,
     flag_conserved_regions,
     is_in_conserved,
 )
-from tqdm.contrib.concurrent import process_map
+import rocksdb
+from sam2lca.config import OPTS_read
+from tqdm.contrib.concurrent import thread_map
+import logging
+from tqdm import tqdm
+
+
+def accession_to_taxid_lookup(accession_list):
+    """Get TAXID of hits from hit accessions per read
+
+    Args:
+        accession list (list): list of unique accession numbers
+    Returns:
+        dict: {accession: taxid}
+    """
+    try:
+        return {i: int(DB.get(bytes(i, encoding="utf8"))) for i in tqdm(accession_list)}
+    except TypeError as e:
+        print(e)
+        return None
 
 
 class Alignment:
@@ -30,7 +50,30 @@ class Alignment:
         self.refs = tuple(present_refs)
         alignment.close()
 
-    def __get_reads_single__(self, ref, identity, minlength, check_conserved):
+    def get_refs_taxid(self, dbname):
+        """Get taxids of referernce sequences
+
+        Args:
+            dbname (str): Path of RocksDB acc2tax database
+        Returns:
+            dict: {ref: taxid}
+        """
+
+        global DB
+
+        logging.info("Step 1/6: Loading acc2tax database")
+        DB = rocksdb.DB(dbname, opts=OPTS_read, read_only=True)
+
+        logging.info("Step 2/6: Converting accession numbers to TAXIDs")
+        self.acc2tax = accession_to_taxid_lookup(self.refs)
+
+        del DB
+
+        return self.acc2tax
+
+    def __get_reads_single__(
+        self, ref, identity, minlength, check_conserved, read_ref_dict
+    ):
         """Get reads passing identity threshold for each reference
 
         Args:
@@ -38,8 +81,8 @@ class Alignment:
             identity (float): identity threshold
             minlength(int): Length threshold.
             check_conserved(bool): Check if read is mapped in conserved region
+            read_ref_dict(dict): {read:set(taxid of mapped_references)}
         """
-        resdic = {}
         al_file = pysam.AlignmentFile(self.al_file, self.mode)
         refcov = compute_coverage(al_file.count_coverage(ref))
         window_size = min(al_file.get_reference_length(ref), 500)
@@ -56,60 +99,61 @@ class Alignment:
                     if check_conserved:
                         is_conserved = is_in_conserved(read, conserved_regions)
                         if is_conserved is False:
-                            resdic[read.query_name] = read.reference_name
+                            try:
+                                read_ref_dict.setdefault(
+                                    read.query_name,
+                                    set({self.acc2tax[read.reference_name]}),
+                                ).add(self.acc2tax[read.reference_name])
+                            except KeyError:
+                                read_ref_dict.setdefault(read.query_name, set({0})).add(
+                                    0
+                                )
+
                     else:
-                        resdic[read.query_name] = read.reference_name
-        return resdic
+                        try:
+                            read_ref_dict.setdefault(
+                                read.query_name,
+                                set({self.acc2tax[read.reference_name]}),
+                            ).add(self.acc2tax[read.reference_name])
+                        except KeyError:
+                            read_ref_dict.setdefault(read.query_name, set({0})).add(0)
 
-    def get_reads(self, process=2, identity=0.9, minlength=30, check_conserved=False):
+    def get_reads(
+        self,
+        process=2,
+        identity=0.9,
+        minlength=30,
+        check_conserved=False,
+    ):
         """Get reads passing identity threshold
-
         Args:
+            dbname(str): Path of RocksDB acc2tax database
             process (int, optional): Number of processes. Defaults to 2.
             identity (float, optional): Identity thresold. Defaults to 0.9.
             minlength(int, optional): Length threshold. Default to 30
             check_conserved(bool, optional): Check conserved regions
+
         """
-        get_reads_partial = partial(
-            self.__get_reads_single__,
-            identity=identity,
-            minlength=minlength,
-            check_conserved=check_conserved,
-        )
 
-        #####################################
-        ## Debugging non-parallelized loop ##
-        #####################################
-        # results = []
-        # for ref in self.refs:
-            # results.append(
-                # self.__get_reads_single__(
-                    # ref=ref,
-                    # identity=identity,
-                    # minlength=minlength,
-                    # check_conserved=check_conserved,
-                # )
-            # )
+        read_ref_dict = dict()
+        if process == 1:
+            for ref in self.refs:
+                self.__get_reads_single__(
+                    ref,
+                    identity,
+                    minlength,
+                    check_conserved,
+                    read_ref_dict,
+                )
+        else:
+            get_reads_partial = partial(
+                self.__get_reads_single__,
+                identity=identity,
+                minlength=minlength,
+                check_conserved=check_conserved,
+                read_ref_dict=read_ref_dict,
+            )
+            logging.info("Step 3/6: Parsing reads in alignment file")
+            thread_map(get_reads_partial, self.refs, max_workers=process, chunksize=1)
 
-        results = process_map(get_reads_partial, self.refs, max_workers=process, chunksize=1)
-
-        def merge_dict(dict_list):
-            """Merge list of dictionaries by key while preserving
-            values
-
-            Args:
-                dict_list (list of dictionaries)
-            Returns:
-                dict: {read:[mapped_references]}
-            """
-            resdict = {}
-            alldict = [list(i.items()) for i in dict_list]
-            for r in alldict:
-                for i in r:
-                    if i[0] not in resdict.keys():
-                        resdict[i[0]] = [i[1]]
-                    else:
-                        resdict[i[0]].append(i[1])
-            return resdict
-
-        return merge_dict(results)
+        return read_ref_dict
