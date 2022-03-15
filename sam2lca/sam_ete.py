@@ -11,7 +11,7 @@ from ordered_set import OrderedSet
 import logging
 
 
-def accession_to_taxid_lookup(accession_list):
+def accession_to_taxid_lookup(accession_list, refnames):
     """Get TAXID of hits from hit accessions per read
 
     Args:
@@ -20,7 +20,7 @@ def accession_to_taxid_lookup(accession_list):
         dict: {accession: taxid}
     """
     try:
-        return {i: int(DB.get(bytes(i, encoding="utf8"))) for i in tqdm(accession_list)}
+        return {i: int(DB.get(bytes(refnames[i], encoding="utf8"))) for i in tqdm(accession_list)}
     except TypeError as e:
         print(e)
         return None
@@ -70,7 +70,7 @@ def taxids_to_lca(taxids, tree):
     return {taxids: int(ancestor)}
 
 
-def compute_lca_multi(read_dict, accession_list, dbname, tree, process):
+def compute_lca_multi(read_dict, accession_list, refnames, dbname, tree, process):
     global DB
 
     logging.info("Step 2/6: Loading the taxonomy database")
@@ -78,7 +78,7 @@ def compute_lca_multi(read_dict, accession_list, dbname, tree, process):
     DB = rocksdb.DB(dbname, opts=OPTS_read, read_only=True)
     logging.info("* Finished loading the taxonomy database")
     logging.info("Step 3/6: Converting accession numbers to TAXIDs")
-    accession2taxid = accession_to_taxid_lookup(accession_list)
+    accession2taxid = accession_to_taxid_lookup(accession_list, refnames)
     del DB
 
     if tree:

@@ -22,11 +22,12 @@ class Alignment:
         self.al_file = al_file
         self.mode = mode[filetype]
         present_refs = set()
+        self.refnames = [refseq['SN'] for refseq in alignment.header.to_dict()['SQ']]
         for ref_stat in alignment.get_index_statistics():
             refname = ref_stat[0]
             nb_mapped_reads = ref_stat[1]
             if nb_mapped_reads > 0:
-                present_refs.add(refname)
+                present_refs.add(self.refnames.index(refname))
         self.refs = tuple(present_refs)
         alignment.close()
 
@@ -41,11 +42,11 @@ class Alignment:
         """
         resdic = {}
         al_file = pysam.AlignmentFile(self.al_file, self.mode)
-        refcov = compute_coverage(al_file.count_coverage(ref))
-        window_size = min(al_file.get_reference_length(ref), 500)
+        refcov = compute_coverage(al_file.count_coverage(self.refnames[ref]))
+        window_size = min(al_file.get_reference_length(self.refnames[ref]), 500)
         if check_conserved:
             conserved_regions = flag_conserved_regions(refcov, window_size=window_size)
-        reads = al_file.fetch(ref, multiple_iterators=True)
+        reads = al_file.fetch(self.refnames[ref], multiple_iterators=True)
         for read in reads:
             if read.has_tag("NM"):
                 mismatch = read.get_tag("NM")
@@ -56,9 +57,9 @@ class Alignment:
                     if check_conserved:
                         is_conserved = is_in_conserved(read, conserved_regions)
                         if is_conserved is False:
-                            resdic[read.query_name] = read.reference_name
+                            resdic[read.query_name] = read.reference_id
                     else:
-                        resdic[read.query_name] = read.reference_name
+                        resdic[read.query_name] = read.reference_id
         return resdic
 
     def get_reads(self, process=2, identity=0.9, minlength=30, check_conserved=False):

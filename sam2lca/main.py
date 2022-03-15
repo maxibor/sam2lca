@@ -40,7 +40,7 @@ def sam2lca(
             f"\t'{acc2tax_db}' database seems to be missing, I'm creating it for you."
         )
         get_mapping(mappings, dbdir=dbdir, update=False)
-    reads_taxid_dict = compute_lca_multi(read_dict, al.refs, acc2tax_db, tree, process)
+    reads_taxid_dict = compute_lca_multi(read_dict, al.refs, al.refnames, acc2tax_db, tree, process)
     taxid_counts, taxid_reads = utils.count_reads_taxid(reads_taxid_dict)
     utils.taxid_to_lineage(taxid_counts, output["sam2lca"])
     if bam_out:
