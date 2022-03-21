@@ -1,6 +1,7 @@
 import ete3
 import rocksdb
 
+global NCBI
 NCBI = ete3.NCBITaxa()
 
 OPTS_create = rocksdb.Options()

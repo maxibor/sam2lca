@@ -5,6 +5,8 @@ from sam2lca.config import NCBI
 import pandas as pd
 import logging
 import warnings
+from collections import Counter, ChainMap
+from tqdm.contrib.concurrent import process_map
 
 warnings.simplefilter(action="ignore", category=FutureWarning)
 
@@ -14,23 +16,18 @@ def count_reads_taxid(read_taxid_dict):
 
     Args:
         read_taxid_dict (dict): {read_name(str): TAXID(int)}
+    Returns:
+        {TAXID(int): count(int)}
     """
-    taxid_cnt = {}
-    taxid_reads = {}
-    for r in read_taxid_dict:
-        if read_taxid_dict[r] not in taxid_cnt:
-            taxid_cnt[read_taxid_dict[r]] = 1
-            taxid_reads[read_taxid_dict[r]] = [r]
-            continue
-        else:
-            taxid_cnt[read_taxid_dict[r]] += 1
-            taxid_reads[read_taxid_dict[r]].append(r)
-    return taxid_cnt, taxid_reads
+    return dict(Counter(read_taxid_dict.values()))
 
 
-def output_file(sam_path):
-    out = os.path.basename(sam_path).split(".")[:-1]
-    out = {"sam2lca": ".".join(out) + ".sam2lca", "bam": ".".join(out) + ".bam"}
+def output_file(thepath):
+    out = os.path.basename(thepath).split(".")[:-1]
+    if len(out) == 0:
+        out = {"sam2lca": f"{thepath}.sam2lca", "bam": f"{thepath}.bam"}
+    else:
+        out = {"sam2lca": ".".join(out) + ".sam2lca", "bam": ".".join(out) + ".bam"}
 
     return out
 
@@ -55,31 +52,51 @@ def check_extension(filename):
         raise Exception(f"{extension} file extension not supported")
 
 
-def taxid_to_lineage(taxid_count_dict, output):
-    res = {}
-    for taxid in taxid_count_dict:
-        read_count = taxid_count_dict[taxid]
+def taxid_to_lineage_single(taxid_items):
+    """Retrieve Taxonomic lineage and species name from NCBI TAXID
+
+    Args:
+        taxid_items (dict_item): (TAXID(int), read_count(int))
+    Returns:
+        {taxid(int): {"name":taxon_name(str), "rank":taxon_rank(str), "count":read_count(int), "lineage":taxon_lineage(list)}}
+    """
+    try:
+        taxid, read_count = taxid_items
         sciname = NCBI.get_taxid_translator([taxid])[taxid]
         rank = NCBI.get_rank([taxid])[taxid]
         taxid_lineage = NCBI.get_lineage(taxid)
         scinames = NCBI.get_taxid_translator(taxid_lineage)
         ranks = NCBI.get_rank(taxid_lineage)
         lineage = [{ranks[taxid]: scinames[taxid]} for taxid in taxid_lineage]
-        res[taxid] = {
+    except Exception:
+        sciname = "NA"
+        rank = "NA"
+        lineage = "NA"
+    return {
+        taxid: {
             "name": sciname,
             "rank": rank,
             "count": read_count,
             "lineage": lineage,
         }
+    }
 
-        df = pd.DataFrame(res).transpose().sort_values("count", ascending=False)
-        df["lineage"] = (
-            df["lineage"]
-            .astype(str)
-            .str.replace("[\[\]\{\}]", "")
-            .str.replace(", ", " - ")
-        )
-        df.to_csv(f"{output}.csv", index_label="TAXID")
+
+def taxid_to_lineage(taxid_count_dict, output, process):
+    logging.info("Converting TAXIDs to taxonomic lineages")
+    res = process_map(
+        taxid_to_lineage_single,
+        taxid_count_dict.items(),
+        chunksize=1,
+        max_workers=process,
+    )
+    res = dict(ChainMap(*res))
+
+    df = pd.DataFrame(res).transpose().sort_values("count", ascending=False)
+    df["lineage"] = (
+        df["lineage"].astype(str).str.replace("[\[\]\{\}]", "").str.replace(", ", " - ")
+    )
+    df.to_csv(f"{output}.csv", index_label="TAXID")
 
     with open(f"{output}.json", "w") as write_file:
         json.dump(res, write_file)

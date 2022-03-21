@@ -10,7 +10,7 @@ from sam2lca.check_conserved_regions import (
 )
 import rocksdb
 from sam2lca.config import OPTS_read
-from tqdm.contrib.concurrent import thread_map
+from tqdm.contrib.concurrent import thread_map, process_map
 import logging
 from tqdm import tqdm
 
@@ -88,7 +88,7 @@ class Alignment:
         window_size = min(al_file.get_reference_length(ref), 500)
         if check_conserved:
             conserved_regions = flag_conserved_regions(refcov, window_size=window_size)
-        reads = al_file.fetch(ref, multiple_iterators=True)
+        reads = al_file.fetch(ref)
         for read in reads:
             if read.has_tag("NM"):
                 mismatch = read.get_tag("NM")
@@ -117,6 +117,7 @@ class Alignment:
                             ).add(self.acc2tax[read.reference_name])
                         except KeyError:
                             read_ref_dict.setdefault(read.query_name, set({0})).add(0)
+        al_file.close()
 
     def get_reads(
         self,

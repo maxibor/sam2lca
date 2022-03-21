@@ -4,8 +4,10 @@ import multiprocessing
 from functools import partial
 from sam2lca.config import NCBI
 from ete3 import Tree
-from tqdm.contrib.concurrent import process_map
+from tqdm.contrib.concurrent import process_map, thread_map
 import logging
+import sys
+from collections import ChainMap
 
 
 def taxids_to_lca(taxids, tree):
@@ -25,7 +27,6 @@ def taxids_to_lca(taxids, tree):
             except ValueError as e:
                 print(e)
         try:
-            # print(list(map(str, taxids[1])))
             ancestor = tree.get_common_ancestor(list(map(str, tuple(taxids)))).name
 
         except ValueError as e:
@@ -33,22 +34,12 @@ def taxids_to_lca(taxids, tree):
     return {taxids: int(ancestor)}
 
 
-def get_unique_taxids_combs(taxids_comb, lcas_dict, tree):
-    """
-    Args:
-        taxids_comb: frozenset(taxids_combs)
-        lcas_dict (dict): dict with unique combination of taxids as keys and taxids of LCA as values
-    """
-    lcas_dict.update(taxids_to_lca(taxids_comb, tree=tree))
-
-
-def read_accession_to_taxid(read_name, read_dict, lcas_dict, ancestors_dict):
+def read_accession_to_taxid(read_name, read_dict, lcas_dict):
     """
     Args:
         read_name (str): read name
         read_dict (dict): dict with read names as keys and taxids as values
         lcas_dict (dict): dict with taxids as keys and taxids of LCA as values
-        ancestors_dict (dict): dict with read names as keys and taxids of LCA as values
     """
     ancestors_dict.update({read_name: lcas_dict[frozenset(read_dict[read_name])]})
 
@@ -60,46 +51,46 @@ def compute_lca_multi(read_dict, tree, process):
     else:
         thetree = None
 
-    manager = multiprocessing.Manager()
+    global ancestors_dict
+    ancestors_dict = dict()  # dict(read : lca)
+
     unique_taxids_combs = set({frozenset(i) for i in read_dict.values()})
+    i = 0
+    for t in unique_taxids_combs:
+        i += 1
+        if i == 10:
+            break
 
     logging.info("Step 4/6: Getting unique TAXID combinations")
+    lcas_dict = dict()
     if process == 1:
-        lcas_dict = dict()  # dict(frozenset(taxids) : lca)
-        ancestors_dict = dict()  # dict(read : lca)
         for taxids_combs in unique_taxids_combs:
             lcas_dict.update(taxids_to_lca(taxids_combs, thetree))
         logging.info("Step 5/6: Computing LCAs")
         for read in read_dict:
-            print(lcas_dict[frozenset(read_dict[read])])
             ancestors_dict.update({read: lcas_dict[frozenset(read_dict[read])]})
 
     else:
-        lcas_dict = manager.dict()  # dict(frozenset(taxids) : lca)
-        ancestors_dict = manager.dict()
-
-        get_unique_taxids_combs_partial = partial(
-            get_unique_taxids_combs, lcas_dict=lcas_dict, tree=tree
-        )
-        process_map(
-            get_unique_taxids_combs_partial,
+        get_taxids_partial = partial(taxids_to_lca, tree=tree)
+        lcas_res = process_map(
+            get_taxids_partial,
             unique_taxids_combs,
             chunksize=1,
             max_workers=process,
         )
 
-        logging.info("Step 5/6: Computing LCAs")
+        lcas_dict = dict(ChainMap(*lcas_res))
+
+        logging.info("Step 5/6: Assigning LCA to reads")
         read_accession_to_taxid_partial = partial(
-            read_accession_to_taxid,
-            read_dict=read_dict,
-            lcas_dict=lcas_dict,
-            ancestors_dict=ancestors_dict,
+            read_accession_to_taxid, read_dict=read_dict, lcas_dict=lcas_dict
         )
 
-        process_map(
+        thread_map(
             read_accession_to_taxid_partial,
             read_dict.keys(),
             chunksize=1,
             max_workers=process,
         )
+
     return ancestors_dict

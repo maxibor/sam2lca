@@ -1,3 +1,4 @@
+from black import out
 from sam2lca.sam_pysam import Alignment
 from sam2lca.ncbi_to_taxid import get_mapping
 from sam2lca.mapfiles import map_db
@@ -7,22 +8,32 @@ from sam2lca.config import NCBI
 from sam2lca.write_alignment import write_bam_tags
 from pathlib import Path
 import logging
+from pathlib import Path
 
 
 def sam2lca(
-    sam, mappings, tree, process, identity, length, conserved, dbdir, output, bam_out
+    sam,
+    mappings,
+    output,
+    tree=None,
+    dbdir=f"{str(Path.home())}/.sam2lca",
+    process=2,
+    identity=0.9,
+    length=35,
+    conserved=False,
+    bam_out=False,
 ):
     """Performs LCA on SAM/BAM/CRAM alignment file
 
     Args:
         sam (str): Path to SAM/BAM/CRAM alignment file
         mappings (str): Type of Acc2Tax mapping
+        output(str): Path to sam2lca output file
         tree (str): Optional taxonomic tree
+        dbdir (str): Path to database storing directory
         process (int): Number of process for parallelization
         identity(float): Minimum identity
         length(int): Minimum alignment length
-        dbdir (str): Path to database stroring directory
-        output(str): Path to sam2lca output file
         bam_out(bool): Write BAM output file with XT tag for TAXID
     """
     acc2tax_db = f"{dbdir}/{map_db[mappings]}"
@@ -35,6 +46,8 @@ def sam2lca(
 
     if not output:
         output = utils.output_file(sam)
+    else:
+        output = utils.output_file(output)
     utils.check_extension(sam)
     al = Alignment(al_file=sam)
     al.get_refs_taxid(acc2tax_db)
@@ -43,8 +56,8 @@ def sam2lca(
     )
 
     reads_taxid_dict = compute_lca_multi(read_dict, tree, process)
-    taxid_counts, taxid_reads = utils.count_reads_taxid(reads_taxid_dict)
-    utils.taxid_to_lineage(taxid_counts, output["sam2lca"])
+    taxid_counts = utils.count_reads_taxid(reads_taxid_dict)
+    utils.taxid_to_lineage(taxid_counts, output["sam2lca"], process=process)
     if bam_out:
         write_bam_tags(sam, output["bam"], reads_taxid_dict)
 
@@ -62,3 +75,12 @@ def update_database(mappings, dbdir, ncbi):
     if ncbi:
         NCBI.update_taxonomy_database()
     get_mapping(mappings, dbdir=dbdir, update=True)
+
+
+if __name__ == "__main__":
+    sam2lca(
+        sam=f"{Path(__file__).parent.resolve()}/../tests/data/aligned.sorted.bam",
+        mappings="test",
+        process=4,
+        output="SZG_sam2lca",
+    )
