@@ -13,6 +13,7 @@ from sam2lca.config import OPTS_read
 from tqdm.contrib.concurrent import thread_map, process_map
 import logging
 from tqdm import tqdm
+from collections import ChainMap
 
 
 def accession_to_taxid_lookup(accession_list):
@@ -31,13 +32,15 @@ def accession_to_taxid_lookup(accession_list):
 
 
 class Alignment:
-    def __init__(self, al_file):
+    def __init__(self, al_file, nb_steps):
         """
         Args:
             al_file (str): Path to alignment file
+            nb_steps (int): Number of steps in sam2lca
         """
         mode = {"sam": "r", "bam": "rb", "cram": "rc"}
         filetype = al_file.split(".")[-1]
+        self.nb_steps = nb_steps
         alignment = pysam.AlignmentFile(al_file, mode[filetype])
         self.al_file = al_file
         self.mode = mode[filetype]
@@ -61,18 +64,37 @@ class Alignment:
 
         global DB
 
-        logging.info("Step 1/6: Loading acc2tax database")
+        logging.info(f"Step 1/{self.nb_steps}: Loading acc2tax database")
         DB = rocksdb.DB(dbname, opts=OPTS_read, read_only=True)
 
-        logging.info("Step 2/6: Converting accession numbers to TAXIDs")
+        logging.info(f"Step 2/{self.nb_steps}: Converting accession numbers to TAXIDs")
         self.acc2tax = accession_to_taxid_lookup(self.refs)
 
         del DB
 
         return self.acc2tax
 
+    def get_conserved_regions(self, ref):
+        """Get regions with higher than expected coverage, with zscore method
+
+        Args:
+            ref (pysam reference): one of pysam.alignment.references
+        """
+
+        al_file = pysam.AlignmentFile(self.al_file, self.mode)
+        refcov = compute_coverage(al_file.count_coverage(ref))
+        window_size = min(al_file.get_reference_length(ref), 500)
+        conserved_regions = flag_conserved_regions(refcov, window_size=window_size)
+        return {ref: conserved_regions}
+
     def __get_reads_single__(
-        self, ref, identity, minlength, check_conserved, read_ref_dict
+        self,
+        ref,
+        identity,
+        minlength,
+        check_conserved,
+        read_ref_dict,
+        cons_ranges=None,
     ):
         """Get reads passing identity threshold for each reference
 
@@ -81,13 +103,11 @@ class Alignment:
             identity (float): identity threshold
             minlength(int): Length threshold.
             check_conserved(bool): Check if read is mapped in conserved region
-            read_ref_dict(dict): {read:set(taxid of mapped_references)}
+            read_ref_dict(dict): {read:set(taxid of mapped_references)
+            cons_ranges: (list): list of start and end positions of windows flagged as
+            conserved [[start, end],[start,end]]
         """
         al_file = pysam.AlignmentFile(self.al_file, self.mode)
-        refcov = compute_coverage(al_file.count_coverage(ref))
-        window_size = min(al_file.get_reference_length(ref), 500)
-        if check_conserved:
-            conserved_regions = flag_conserved_regions(refcov, window_size=window_size)
         reads = al_file.fetch(ref)
         for read in reads:
             if read.has_tag("NM"):
@@ -97,7 +117,7 @@ class Alignment:
                 ident = (alnLen - mismatch) / readLen
                 if ident >= identity and alnLen >= minlength:
                     if check_conserved:
-                        is_conserved = is_in_conserved(read, conserved_regions)
+                        is_conserved = is_in_conserved(read, self.cons_dict[ref])
                         if is_conserved is False:
                             try:
                                 read_ref_dict.setdefault(
@@ -120,11 +140,7 @@ class Alignment:
         al_file.close()
 
     def get_reads(
-        self,
-        process=2,
-        identity=0.9,
-        minlength=30,
-        check_conserved=False,
+        self, process=2, identity=0.9, minlength=30, check_conserved=False, nb_steps=7
     ):
         """Get reads passing identity threshold
         Args:
@@ -133,20 +149,35 @@ class Alignment:
             identity (float, optional): Identity thresold. Defaults to 0.9.
             minlength(int, optional): Length threshold. Default to 30
             check_conserved(bool, optional): Check conserved regions
+            nb_steps(int, optional): Number of steps in sam2lca. Defaults to 7.
 
         """
 
         read_ref_dict = dict()
+
+        if check_conserved:
+            logging.info(f"Step 3/{self.nb_steps}: Getting conserved regions")
+
         if process == 1:
-            for ref in self.refs:
+            self.cons_dict = dict()
+            for ref in tqdm(self.refs):
+                if check_conserved:
+                    self.cons_dict.update(ref, self.get_conserved_regions(ref))
+
                 self.__get_reads_single__(
-                    ref,
-                    identity,
-                    minlength,
-                    check_conserved,
-                    read_ref_dict,
+                    ref, identity, minlength, check_conserved, read_ref_dict
                 )
+
         else:
+            if check_conserved:
+                cons_res = process_map(
+                    self.get_conserved_regions,
+                    self.refs,
+                    max_workers=process,
+                    chunksize=1,
+                )
+                self.cons_dict = dict(ChainMap(*cons_res))
+
             get_reads_partial = partial(
                 self.__get_reads_single__,
                 identity=identity,
@@ -154,7 +185,9 @@ class Alignment:
                 check_conserved=check_conserved,
                 read_ref_dict=read_ref_dict,
             )
-            logging.info("Step 3/6: Parsing reads in alignment file")
+            logging.info(
+                f"Step {3 if self.nb_steps == 7 else 4 }/{self.nb_steps}: Parsing reads in alignment file"
+            )
             thread_map(get_reads_partial, self.refs, max_workers=process, chunksize=1)
 
         return read_ref_dict

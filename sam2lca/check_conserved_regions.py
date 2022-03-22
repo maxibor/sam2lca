@@ -9,12 +9,7 @@ def compute_coverage(pysam_cov):
     Returns:
         np.array: 1D int array of coverage at each base
     """
-    A = np.array(pysam_cov[0], dtype=int)
-    C = np.array(pysam_cov[1], dtype=int)
-    G = np.array(pysam_cov[2], dtype=int)
-    T = np.array(pysam_cov[3], dtype=int)
-    cov = A + C + G + T
-    return cov
+    return np.sum(pysam_cov, axis=0)
 
 
 def zscore(cov):
@@ -34,7 +29,7 @@ def zscore(cov):
 
 
 def flag_conserved_regions(cov_array, window_size=500, zscore_thresh=1.65):
-    """Flag ultra-conserved regions by checking coverage
+    """Flag ultra-conserved regions by checking coverage with zscore
 
     Args:
         cov_array (np.array): 1D int array of coverage at each base
@@ -55,6 +50,7 @@ def flag_conserved_regions(cov_array, window_size=500, zscore_thresh=1.65):
     cons_range = []
     for i in conserved_regions:
         cons_range.append([i, min(i + window_size, cov_array.size - 1)])
+
     return cons_range
 
 
