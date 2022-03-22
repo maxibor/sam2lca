@@ -10,13 +10,17 @@ def write_bam_tags(infile, outfile, read_taxid_dict):
         outfile (str): Path to output file
         read_taxid_dict (dict): Dictionary of read with their corresponding LCA taxid
     """
-    logging.info(f"Step 7/6: Writing BAM file with XT TAXID tags to {outfile}")
+    logging.info(f"* BAM file, with XT tags set to LCA TAXID, to {outfile}")
     mode = {"sam": "r", "bam": "rb", "cram": "rc"}
     filetype = infile.split(".")[-1]
     with AlignmentFile(infile, mode[filetype]) as samfile:
         with AlignmentFile(outfile, "wb", template=samfile) as outfile:
             for read in samfile:
-                read.set_tag("XT", read_taxid_dict[read.query_name], "i")
+                try:
+                    read.set_tag("XT", read_taxid_dict[read.query_name], "i")
+
+                except KeyError:
+                    read.set_tag("XT", 0, "i")
                 outfile.write(read)
         outfile.close()
     samfile.close()

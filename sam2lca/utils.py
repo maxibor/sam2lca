@@ -82,8 +82,10 @@ def taxid_to_lineage_single(taxid_items):
     }
 
 
-def taxid_to_lineage(taxid_count_dict, output, process):
-    logging.info("Converting TAXIDs to taxonomic lineages")
+def taxid_to_lineage(taxid_count_dict, output, process, nb_steps):
+    logging.info(
+        f"Step {6 if nb_steps == 7 else 7 }/{nb_steps}: Converting TAXIDs to taxonomic lineages"
+    )
     res = process_map(
         taxid_to_lineage_single,
         taxid_count_dict.items(),
@@ -101,7 +103,7 @@ def taxid_to_lineage(taxid_count_dict, output, process):
     with open(f"{output}.json", "w") as write_file:
         json.dump(res, write_file)
     logging.info(
-        f"Step 6/6: writing sam2lca results to:\n* {output}.json\n* {output}.csv"
+        f"Step {7 if nb_steps == 7 else 8 }/{nb_steps}: writing sam2lca results:\n* JSON to {output}.json\n* CSV to {output}.csv"
     )
 
     return res

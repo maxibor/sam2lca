@@ -44,7 +44,7 @@ def read_accession_to_taxid(read_name, read_dict, lcas_dict):
     ancestors_dict.update({read_name: lcas_dict[frozenset(read_dict[read_name])]})
 
 
-def compute_lca_multi(read_dict, tree, process):
+def compute_lca_multi(read_dict, tree, process, nb_steps):
 
     if tree:
         thetree = Tree(tree, format=1)
@@ -61,12 +61,13 @@ def compute_lca_multi(read_dict, tree, process):
         if i == 10:
             break
 
-    logging.info("Step 4/6: Getting unique TAXID combinations")
+    logging.info(
+        f"Step {4 if nb_steps == 7 else 5 }/{nb_steps}: Getting unique TAXID combinations"
+    )
     lcas_dict = dict()
     if process == 1:
         for taxids_combs in unique_taxids_combs:
             lcas_dict.update(taxids_to_lca(taxids_combs, thetree))
-        logging.info("Step 5/6: Computing LCAs")
         for read in read_dict:
             ancestors_dict.update({read: lcas_dict[frozenset(read_dict[read])]})
 
@@ -81,7 +82,9 @@ def compute_lca_multi(read_dict, tree, process):
 
         lcas_dict = dict(ChainMap(*lcas_res))
 
-        logging.info("Step 5/6: Assigning LCA to reads")
+        logging.info(
+            f"Step {5 if nb_steps == 7 else 6 }/{nb_steps}: Assigning LCA to reads"
+        )
         read_accession_to_taxid_partial = partial(
             read_accession_to_taxid, read_dict=read_dict, lcas_dict=lcas_dict
         )
