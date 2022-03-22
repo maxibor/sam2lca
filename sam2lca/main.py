@@ -1,4 +1,3 @@
-from black import out
 from sam2lca.sam_pysam import Alignment
 from sam2lca.ncbi_to_taxid import get_mapping
 from sam2lca.mapfiles import map_db
@@ -8,18 +7,18 @@ from sam2lca.config import NCBI
 from sam2lca.write_alignment import write_bam_tags
 from pathlib import Path
 import logging
-from pathlib import Path
+from multiprocessing import cpu_count
 
 
 def sam2lca(
     sam,
     mappings,
-    output,
+    output=None,
     tree=None,
     dbdir=f"{str(Path.home())}/.sam2lca",
     process=2,
-    identity=0.9,
-    length=35,
+    identity=0.8,
+    length=30,
     conserved=False,
     bam_out=False,
 ):
@@ -36,6 +35,9 @@ def sam2lca(
         length(int): Minimum alignment length
         bam_out(bool): Write BAM output file with XT tag for TAXID
     """
+    nb_steps = 8 if conserved else 7
+    process = cpu_count() if process == 0 else process
+
     acc2tax_db = f"{dbdir}/{map_db[mappings]}"
     p = Path(acc2tax_db)
     if not p.exists():
@@ -49,15 +51,20 @@ def sam2lca(
     else:
         output = utils.output_file(output)
     utils.check_extension(sam)
-    al = Alignment(al_file=sam)
+    al = Alignment(al_file=sam, nb_steps=nb_steps)
     al.get_refs_taxid(acc2tax_db)
     read_dict = al.get_reads(
-        process=process, identity=identity, minlength=length, check_conserved=conserved
+        process=process,
+        identity=identity,
+        minlength=length,
+        check_conserved=conserved,
     )
 
-    reads_taxid_dict = compute_lca_multi(read_dict, tree, process)
+    reads_taxid_dict = compute_lca_multi(read_dict, tree, process, nb_steps)
     taxid_counts = utils.count_reads_taxid(reads_taxid_dict)
-    utils.taxid_to_lineage(taxid_counts, output["sam2lca"], process=process)
+    utils.taxid_to_lineage(
+        taxid_counts, output["sam2lca"], process=process, nb_steps=nb_steps
+    )
     if bam_out:
         write_bam_tags(sam, output["bam"], reads_taxid_dict)
 
@@ -80,7 +87,8 @@ def update_database(mappings, dbdir, ncbi):
 if __name__ == "__main__":
     sam2lca(
         sam=f"{Path(__file__).parent.resolve()}/../tests/data/aligned.sorted.bam",
+        conserved=False,
         mappings="test",
-        process=4,
-        output="SZG_sam2lca",
+        process=0,
+        bam_out=True,
     )
