@@ -49,7 +49,7 @@ def flag_conserved_regions(cov_array, window_size=500, zscore_thresh=1.65):
     conserved_regions = cov_bin_median[1][:-1].astype(int)[is_conserved]
     cons_range = []
     for i in conserved_regions:
-        cons_range.append([i, min(i + window_size, cov_array.size - 1)])
+        cons_range.append((i, min(i + window_size, cov_array.size - 1)))
 
     return cons_range
 
