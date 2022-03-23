@@ -27,7 +27,10 @@ def output_file(thepath):
     if len(out) == 0:
         out = {"sam2lca": f"{thepath}.sam2lca", "bam": f"{thepath}.bam"}
     else:
-        out = {"sam2lca": ".".join(out) + ".sam2lca", "bam": ".".join(out) + ".bam"}
+        out = {
+            "sam2lca": ".".join(out) + ".sam2lca",
+            "bam": ".".join(out) + ".sam2lca.bam",
+        }
 
     return out
 
