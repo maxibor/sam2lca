@@ -27,7 +27,7 @@ def accession_to_taxid_lookup(accession_list):
     try:
         return {i: int(DB.get(bytes(i, encoding="utf8"))) for i in tqdm(accession_list)}
     except TypeError as e:
-        print(e)
+        logging.error(e)
         return None
 
 

@@ -25,15 +25,12 @@ def taxids_to_lca(taxids, tree):
             try:
                 tree = NCBI.get_topology(tuple(taxids), intermediate_nodes=True)
             except ValueError as e:
-                print(e)
+                logging.error(e)
         try:
-            print(taxids)
-            print(list(map(str, tuple(taxids))))
-            print(tree)
             ancestor = tree.get_common_ancestor(list(map(str, tuple(taxids)))).name
 
         except ValueError as e:
-            print(e)
+            logging.error(e)
     return {taxids: int(ancestor)}
 
 
