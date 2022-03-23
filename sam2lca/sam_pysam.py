@@ -79,6 +79,8 @@ class Alignment:
 
         Args:
             ref (pysam reference): one of pysam.alignment.references
+        Returns:
+            dict: {reference: conserved_regions[(start,end)]}
         """
 
         al_file = pysam.AlignmentFile(self.al_file, self.mode)
@@ -93,8 +95,6 @@ class Alignment:
         identity,
         minlength,
         check_conserved,
-        read_ref_dict,
-        cons_ranges=None,
     ):
         """Get reads passing identity threshold for each reference
 
@@ -103,9 +103,6 @@ class Alignment:
             identity (float): identity threshold
             minlength(int): Length threshold.
             check_conserved(bool): Check if read is mapped in conserved region
-            read_ref_dict(dict): {read:set(taxid of mapped_references)
-            cons_ranges: (list): list of start and end positions of windows flagged as
-            conserved [[start, end],[start,end]]
         """
         al_file = pysam.AlignmentFile(self.al_file, self.mode)
         reads = al_file.fetch(ref)
@@ -120,28 +117,28 @@ class Alignment:
                         is_conserved = is_in_conserved(read, self.cons_dict[ref])
                         if is_conserved is False:
                             try:
-                                read_ref_dict.setdefault(
+                                self.read_ref_dict.setdefault(
                                     read.query_name,
                                     set({self.acc2tax[read.reference_name]}),
                                 ).add(self.acc2tax[read.reference_name])
                             except KeyError:
-                                read_ref_dict.setdefault(read.query_name, set({0})).add(
-                                    0
-                                )
+                                self.read_ref_dict.setdefault(
+                                    read.query_name, set({0})
+                                ).add(0)
 
                     else:
                         try:
-                            read_ref_dict.setdefault(
+                            self.read_ref_dict.setdefault(
                                 read.query_name,
                                 set({self.acc2tax[read.reference_name]}),
                             ).add(self.acc2tax[read.reference_name])
                         except KeyError:
-                            read_ref_dict.setdefault(read.query_name, set({0})).add(0)
+                            self.read_ref_dict.setdefault(
+                                read.query_name, set({0})
+                            ).add(0)
         al_file.close()
 
-    def get_reads(
-        self, process=2, identity=0.9, minlength=30, check_conserved=False, nb_steps=7
-    ):
+    def get_reads(self, process=2, identity=0.9, minlength=30, check_conserved=False):
         """Get reads passing identity threshold
         Args:
             dbname(str): Path of RocksDB acc2tax database
@@ -149,11 +146,11 @@ class Alignment:
             identity (float, optional): Identity thresold. Defaults to 0.9.
             minlength(int, optional): Length threshold. Default to 30
             check_conserved(bool, optional): Check conserved regions
-            nb_steps(int, optional): Number of steps in sam2lca. Defaults to 7.
-
+        Returns:
+            dict: {read: set(mappeds TAXIDs)}
         """
 
-        read_ref_dict = dict()
+        self.read_ref_dict = dict()
 
         if check_conserved:
             logging.info(f"Step 3/{self.nb_steps}: Getting conserved regions")
@@ -164,9 +161,7 @@ class Alignment:
                 if check_conserved:
                     self.cons_dict.update(ref, self.get_conserved_regions(ref))
 
-                self.__get_reads_single__(
-                    ref, identity, minlength, check_conserved, read_ref_dict
-                )
+                self.__get_reads_single__(ref, identity, minlength, check_conserved)
 
         else:
             if check_conserved:
@@ -183,11 +178,10 @@ class Alignment:
                 identity=identity,
                 minlength=minlength,
                 check_conserved=check_conserved,
-                read_ref_dict=read_ref_dict,
             )
             logging.info(
                 f"Step {3 if self.nb_steps == 7 else 4 }/{self.nb_steps}: Parsing reads in alignment file"
             )
             thread_map(get_reads_partial, self.refs, max_workers=process, chunksize=1)
 
-        return read_ref_dict
+        return self.read_ref_dict
