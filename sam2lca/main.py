@@ -1,6 +1,6 @@
 from sam2lca.sam_pysam import Alignment
 from sam2lca.ncbi_to_taxid import get_mapping
-from sam2lca.mapfiles import map_db
+from sam2lca.mapfiles import get_map_config, base_map_config
 from sam2lca.sam_ete import compute_lca_multi
 from sam2lca import utils
 from sam2lca.config import NCBI
@@ -13,6 +13,7 @@ from multiprocessing import cpu_count
 def sam2lca(
     sam,
     mappings,
+    map_config=None,
     output=None,
     tree=None,
     dbdir=f"{str(Path.home())}/.sam2lca",
@@ -27,6 +28,7 @@ def sam2lca(
     Args:
         sam (str): Path to SAM/BAM/CRAM alignment file
         mappings (str): Type of Acc2Tax mapping
+        map_config(str): Path to map_config json file
         output(str): Path to sam2lca output file
         tree (str): Path to optional taxonomic tree
         dbdir (str): Path to database storing directory
@@ -38,13 +40,18 @@ def sam2lca(
     nb_steps = 8 if conserved else 7
     process = cpu_count() if process == 0 else process
 
-    acc2tax_db = f"{dbdir}/{map_db[mappings]}"
+    if map_config is None:
+        map_config = base_map_config
+    else:
+        map_config = get_map_config(map_config_file=map_config)
+
+    acc2tax_db = f"{dbdir}/{map_config['map_db'][mappings]}"
     p = Path(acc2tax_db)
     if not p.exists():
         logging.info(
             f"\t'{acc2tax_db}' database seems to be missing, I'm creating it for you."
         )
-        get_mapping(mappings, dbdir=dbdir, update=False)
+        get_mapping(map_config=map_config, maptype=mappings, dbdir=dbdir, update=False)
 
     if not output:
         output = utils.output_file(sam)
@@ -69,19 +76,25 @@ def sam2lca(
         write_bam_tags(sam, output["bam"], reads_taxid_dict)
 
 
-def update_database(mappings, dbdir, ncbi):
+def update_database(mappings, dbdir, ncbi, map_config=None):
     """Performs LCA on SAM/BAM/CRAM alignment file
 
     Args:
         mappings (str): Type of Acc2Tax mapping
         dbdir (str): Path to database stroring directory
         ncbi (bool): Updates NCBI taxonomic tree
+        map_config(str): Path to map_config json file
     """
     logging.info("Downloading/updating database")
-    NCBI
+
+    if map_config is None:
+        map_config = base_map_config
+    else:
+        map_config = get_map_config(map_config_file=map_config)
+
     if ncbi:
         NCBI.update_taxonomy_database()
-    get_mapping(mappings, dbdir=dbdir, update=True)
+    get_mapping(map_config=map_config, maptype=mappings, dbdir=dbdir, update=True)
 
 
 if __name__ == "__main__":

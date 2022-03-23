@@ -3,7 +3,7 @@
 import click
 from sam2lca import __version__
 from sam2lca.main import sam2lca, update_database
-from sam2lca.mapfiles import mapfiles
+from sam2lca.mapfiles import base_map_config
 from pathlib import Path
 
 
@@ -11,9 +11,17 @@ from pathlib import Path
 @click.version_option(__version__)
 @click.pass_context
 @click.option(
+    "-c",
+    "--map_config",
+    type=click.Path(writable=True, dir_okay=False, file_okay=True),
+    default=None,
+    show_default=True,
+    help="(Optional) JSON custom mapping type of accession to TAXID",
+)
+@click.option(
     "-m",
     "--mappings",
-    type=click.Choice(list(mapfiles.keys()), case_sensitive=False),
+    type=click.Choice(list(base_map_config["mapfiles"].keys()), case_sensitive=False),
     default="nucl",
     show_default=True,
     help="Mapping type of accession to TAXID",
@@ -26,7 +34,7 @@ from pathlib import Path
     show_default=True,
     help="Directory to store taxonomy databases",
 )
-def cli(ctx, mappings, dbdir):
+def cli(ctx, map_config, mappings, dbdir):
     """\b
     sam2lca: Last Common Ancestor on SAM/BAM/CRAM alignment files
     Author: Maxime Borry
@@ -34,7 +42,7 @@ def cli(ctx, mappings, dbdir):
     Homepage & Documentation: github.com/maxibor/sam2lca
     """
     ctx.ensure_object(dict)
-
+    ctx.obj["map_config"] = map_config
     ctx.obj["mappings"] = mappings
     ctx.obj["dbdir"] = dbdir
     pass

@@ -2,13 +2,13 @@ import sys
 import hashlib
 import os
 import urllib.request as urllib
-from sam2lca.mapfiles import mapfiles, mapmd5, map_db
 from sam2lca.config import OPTS_create
 from xopen import xopen
 from tqdm import tqdm
 from subprocess import check_output
 import rocksdb
 import shutil
+import logging
 
 
 class TqdmUpTo(tqdm):
@@ -77,16 +77,15 @@ def dl_mappings(mapping_url, md5_url, dbdir):
     try:
         assert file_hash == md5_hash
     except AssertionError:
-        print(f"Error while downloading {mapping_url}, please try again")
+        logging.error(f"Error while downloading {mapping_url}, please try again")
         sys.exit(1)
     return mapping_fname
 
 
-def mapping_file_to_db(mapdb, mapfile, mapmd5, dbdir):
+def mapping_file_to_db(mapfile, mapmd5, dbdir):
     """Read mapping to dict and pickle
 
     Args:
-        mapdb (str): Mapping db name
         mapfile(str): Mapping file
         mapmd5 (str): Mapping file md5
         dbdir (str): Mapping file location
@@ -132,16 +131,21 @@ def mapping_file_to_db(mapdb, mapfile, mapmd5, dbdir):
     os.remove(f"{dbdir}/{mapmd5}")
 
 
-def get_mapping(maptype, dbdir, update):
+def get_mapping(map_config, maptype, dbdir, update):
     """Get genbank to taxid mapping
 
     Args:
+        map_config (dict): Mapping config
         maptype(str): Mapping type: nucl or prot
         dbdir(str): Directory to store taxonomy databases
         update(bool): Update mapping database
     """
+    mapfiles = map_config["mapfiles"]
+    mapmd5 = map_config["mapmd5"]
+    map_db = map_config["map_db"]
+
     if maptype not in mapfiles.keys():
-        print(f"mapping type not in {', '.join(list(mapfiles.keys()))}")
+        logging.error(f"mapping type not in {', '.join(list(mapfiles.keys()))}")
         sys.exit(1)
 
     os.makedirs(dbdir, exist_ok=True)
@@ -158,9 +162,9 @@ def get_mapping(maptype, dbdir, update):
                 try:
                     os.remove(f"{dbdir}/{mapfile}")
                 except FileNotFoundError as e:
-                    print(f"No local copy of {mapfile}")
+                    logging.error(f"No local copy of {mapfile}")
 
-                print(
+                logging.info(
                     f"Downloading '{maptype}' acc2tax mapping file [{i+1}/{nb_files}]"
                 )
                 mapname = dl_mappings(
@@ -170,10 +174,9 @@ def get_mapping(maptype, dbdir, update):
                 )
             else:
                 mapname = mapfiles[maptype][i].split("/")[-1]
-            print("Inserting mappings into database")
+            logging.info("Inserting mappings into database")
             mapping_file_to_db(
                 mapfile=mapname,
-                mapdb=map_db[maptype],
                 dbdir=dbdir,
                 mapmd5=mapmd5[maptype][i].split("/")[-1],
             )

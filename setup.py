@@ -40,6 +40,9 @@ setup(
     entry_points={"console_scripts": ["sam2lca = sam2lca.cli:cli"]},
     include_package_data=True,
     package_data={
-        "sam2lca": ["data/test.accession2taxid.gz", "data/test.accession2taxid.gz.md5"]
+        "sam2lca": [
+            "data/test.accession2taxid.gz",
+            "data/test.accession2taxid.gz.md5",
+        ]
     },
 )
