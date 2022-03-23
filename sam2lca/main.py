@@ -28,7 +28,7 @@ def sam2lca(
         sam (str): Path to SAM/BAM/CRAM alignment file
         mappings (str): Type of Acc2Tax mapping
         output(str): Path to sam2lca output file
-        tree (str): Optional taxonomic tree
+        tree (str): Path to optional taxonomic tree
         dbdir (str): Path to database storing directory
         process (int): Number of process for parallelization
         identity(float): Minimum identity
@@ -88,6 +88,7 @@ if __name__ == "__main__":
     sam2lca(
         sam=f"{Path(__file__).parent.resolve()}/../tests/data/aligned.sorted.bam",
         conserved=False,
+        tree=f"{Path(__file__).parent.resolve()}/../tests/data/taxonomy/test.tree",
         mappings="test",
         process=0,
         bam_out=True,

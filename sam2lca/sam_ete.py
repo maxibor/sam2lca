@@ -27,6 +27,9 @@ def taxids_to_lca(taxids, tree):
             except ValueError as e:
                 print(e)
         try:
+            print(taxids)
+            print(list(map(str, tuple(taxids))))
+            print(tree)
             ancestor = tree.get_common_ancestor(list(map(str, tuple(taxids)))).name
 
         except ValueError as e:
@@ -72,7 +75,7 @@ def compute_lca_multi(read_dict, tree, process, nb_steps):
             ancestors_dict.update({read: lcas_dict[frozenset(read_dict[read])]})
 
     else:
-        get_taxids_partial = partial(taxids_to_lca, tree=tree)
+        get_taxids_partial = partial(taxids_to_lca, tree=thetree)
         lcas_res = process_map(
             get_taxids_partial,
             unique_taxids_combs,
