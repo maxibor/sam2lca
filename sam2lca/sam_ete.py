@@ -1,6 +1,5 @@
 #!/usr/bin/env python3
 
-import multiprocessing
 from functools import partial
 from sam2lca.config import NCBI
 from ete3 import Tree

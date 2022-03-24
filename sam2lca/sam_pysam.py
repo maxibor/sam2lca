@@ -1,8 +1,6 @@
 #!/usr/bin/env python3
 
 import pysam
-from functools import partial
-from multiprocessing import Manager
 from sam2lca.check_conserved_regions import (
     compute_coverage,
     flag_conserved_regions,
@@ -10,7 +8,7 @@ from sam2lca.check_conserved_regions import (
 )
 import rocksdb
 from sam2lca.config import OPTS_read
-from tqdm.contrib.concurrent import thread_map, process_map
+from tqdm.contrib.concurrent import process_map
 import logging
 from tqdm import tqdm
 from collections import ChainMap
@@ -89,32 +87,27 @@ class Alignment:
         conserved_regions = flag_conserved_regions(refcov, window_size=window_size)
         return {ref: conserved_regions}
 
-    def __get_reads_single__(
-        self,
-        ref,
-        identity,
-        minlength,
-        check_conserved,
-    ):
+    def __get_reads_refs__(self, identity, minlength, check_conserved, process):
         """Get reads passing identity threshold for each reference
 
         Args:
-            ref (pysam reference): one of pysam.alignment.references
             identity (float): identity threshold
             minlength(int): Length threshold.
             check_conserved(bool): Check if read is mapped in conserved region
+            process(int): Number of processes
         """
-        al_file = pysam.AlignmentFile(self.al_file, self.mode)
-        reads = al_file.fetch(ref)
-        for read in reads:
-            if read.has_tag("NM"):
+        al_file = pysam.AlignmentFile(self.al_file, self.mode, threads=process)
+        for read in tqdm(al_file, unit="reads"):
+            if read.has_tag("NM") and read.is_mapped:
                 mismatch = read.get_tag("NM")
                 alnLen = read.query_alignment_length
                 readLen = read.query_length
                 ident = (alnLen - mismatch) / readLen
                 if ident >= identity and alnLen >= minlength:
                     if check_conserved:
-                        is_conserved = is_in_conserved(read, self.cons_dict[ref])
+                        is_conserved = is_in_conserved(
+                            read, self.cons_dict[read.reference_name]
+                        )
                         if is_conserved is False:
                             try:
                                 self.read_ref_dict.setdefault(
@@ -173,15 +166,15 @@ class Alignment:
                 )
                 self.cons_dict = dict(ChainMap(*cons_res))
 
-            get_reads_partial = partial(
-                self.__get_reads_single__,
-                identity=identity,
-                minlength=minlength,
-                check_conserved=check_conserved,
-            )
             logging.info(
                 f"Step {3 if self.nb_steps == 7 else 4 }/{self.nb_steps}: Parsing reads in alignment file"
             )
-            thread_map(get_reads_partial, self.refs, max_workers=process, chunksize=1)
+
+            self.__get_reads_refs__(
+                identity=identity,
+                minlength=minlength,
+                check_conserved=check_conserved,
+                process=process,
+            )
 
         return self.read_ref_dict
