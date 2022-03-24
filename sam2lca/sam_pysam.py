@@ -98,7 +98,7 @@ class Alignment:
         """
         al_file = pysam.AlignmentFile(self.al_file, self.mode, threads=process)
         for read in tqdm(al_file, unit="reads"):
-            if read.has_tag("NM") and read.is_mapped:
+            if read.has_tag("NM") and not read.is_unmapped:
                 mismatch = read.get_tag("NM")
                 alnLen = read.query_alignment_length
                 readLen = read.query_length
