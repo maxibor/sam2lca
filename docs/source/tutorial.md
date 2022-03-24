@@ -40,7 +40,7 @@ Before doing any alignment, we need to index the angiosperms353 database with bo
 bowtie2-build angiosperms353_markers.fa angiosperms353
 ```
 
-> This step might be a bit long, because of the many references present in this database, you may want to speet it up by parallelizing it using the `--theads` option.
+> This step might be a bit long, because of the many references present in this database, you may want to speed it up by parallelizing it using the `--threads` option.
 
 ## Preparing `fastq` sequencing files
 
