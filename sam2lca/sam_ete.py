@@ -30,6 +30,7 @@ def taxids_to_lca(taxids, tree):
 
         except ValueError as e:
             logging.error(e)
+            ancestor = 0
     return {taxids: int(ancestor)}
 
 
