@@ -16,8 +16,10 @@ def sam2lca(
     mappings,
     map_config=None,
     output=None,
-    tree=None,
     dbdir=f"{str(Path.home())}/.sam2lca",
+    names=None,
+    nodes=None,
+    merged=None,
     process=2,
     identity=0.8,
     length=30,
@@ -31,8 +33,10 @@ def sam2lca(
         mappings (str): Type of Acc2Tax mapping
         map_config(str): Path to map_config json file
         output(str): Path to sam2lca output file
-        tree (str): Path to optional taxonomic tree
         dbdir (str): Path to database storing directory
+        names(str): names.dmp file for taxonomy database. None loads the NCBI taxonomy database
+        nodes(str): nodes.dmp file for taxonomy database. None loads the NCBI taxonomy database
+        merged(str): merged.dmp file for taxonomy database. None loads the NCBI taxonomy database
         process (int): Number of process for parallelization
         identity(float): Minimum identity
         length(int): Minimum alignment length
@@ -41,7 +45,11 @@ def sam2lca(
     nb_steps = 8 if conserved else 7
     process = cpu_count() if process == 0 else process
 
-    TAXDB = setup_taxopy_db(db_path=dbdir)
+    print(names, nodes, merged)
+
+    logging.info(f"Step 1/{nb_steps}: Loading taxonomy database")
+
+    TAXDB = setup_taxopy_db(db_path=dbdir, names=names, nodes=nodes, merged=merged)
 
     if map_config is None:
         map_config = base_map_config

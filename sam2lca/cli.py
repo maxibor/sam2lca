@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 
+from typing import Optional
 import click
 from sam2lca import __version__
 from sam2lca.main import sam2lca, update_database
@@ -52,6 +53,24 @@ def cli(ctx, map_config, mappings, dbdir):
 @click.pass_context
 @click.argument("sam", type=click.Path(exists=True))
 @click.option(
+    "--names",
+    type=click.Path(readable=True, dir_okay=False, file_okay=True),
+    default=None,
+    help="names.dmp file for taxonomy database (optional). Default is names.dmp from NCBI taxonomy database",
+)
+@click.option(
+    "--nodes",
+    type=click.Path(readable=True, dir_okay=False, file_okay=True),
+    default=None,
+    help="nodes.dmp file for taxonomy database (optional). Default is nodes.dmp from NCBI taxonomy database",
+)
+@click.option(
+    "--merged",
+    type=click.Path(readable=True, dir_okay=False, file_okay=True),
+    default=None,
+    help="merged.dmp file for taxonomy database (optional). Default is merged.dmp from NCBI taxonomy database",
+)
+@click.option(
     "-i",
     "--identity",
     type=float,
@@ -80,9 +99,6 @@ def cli(ctx, map_config, mappings, dbdir):
     default=2,
     show_default=True,
     help="Number of process for parallelization",
-)
-@click.option(
-    "-t", "--tree", type=click.Path(exists=True), help="Optional Newick Taxonomy Tree"
 )
 @click.option(
     "-o",

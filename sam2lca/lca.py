@@ -29,9 +29,10 @@ def taxids_to_lca(read_dict_item, taxo_db):
             ).taxid
         except TaxidError as e:
             logging.error(e)
+            logging.error(taxids)
             ancestor = 0
 
-        ANCESTORS_DICT.update({read: ancestor})
+    ANCESTORS_DICT.update({read: ancestor})
 
 
 def compute_lca(read_dict, process, nb_steps, taxo_db):

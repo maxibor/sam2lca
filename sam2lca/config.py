@@ -14,7 +14,13 @@ def setup_taxopy_db(db_path, nodes=None, names=None, merged=None):
     Returns:
         taxopy.TaxDb: Taxonomy database
     """
-    return TaxDb(taxdb_dir=db_path, keep_files=True)
+    return TaxDb(
+        taxdb_dir=db_path,
+        keep_files=True,
+        nodes_dmp=nodes,
+        names_dmp=names,
+        merged_dmp=merged,
+    )
 
 
 OPTS_create = rocksdb.Options()

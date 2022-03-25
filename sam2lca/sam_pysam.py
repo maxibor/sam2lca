@@ -62,10 +62,10 @@ class Alignment:
 
         global DB
 
-        logging.info(f"Step 1/{self.nb_steps}: Loading acc2tax database")
+        logging.info(f"Step 2/{self.nb_steps}: Loading acc2tax database")
         DB = rocksdb.DB(dbname, opts=OPTS_read, read_only=True)
 
-        logging.info(f"Step 2/{self.nb_steps}: Converting accession numbers to TAXIDs")
+        logging.info(f"Step 3/{self.nb_steps}: Converting accession numbers to TAXIDs")
         self.acc2tax = accession_to_taxid_lookup(self.refs)
 
         del DB
@@ -147,7 +147,7 @@ class Alignment:
         self.read_ref_dict = dict()
 
         if check_conserved:
-            logging.info(f"Step 3/{self.nb_steps}: Getting conserved regions")
+            logging.info(f"Step 4/{self.nb_steps}: Getting conserved regions")
 
         if process == 1:
             self.cons_dict = dict()
@@ -168,7 +168,7 @@ class Alignment:
                 self.cons_dict = dict(ChainMap(*cons_res))
 
             logging.info(
-                f"Step {3 if self.nb_steps == 7 else 4 }/{self.nb_steps}: Parsing reads in alignment file"
+                f"Step {4 if self.nb_steps == 7 else 5 }/{self.nb_steps}: Parsing reads in alignment file"
             )
 
             self.__get_reads_refs__(

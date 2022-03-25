@@ -35,6 +35,8 @@ setup(
         "python-rocksdb",
         "taxopy",
         "pandas",
+        "scipy",
+        "numpy",
     ],
     packages=find_packages(include=["sam2lca"]),
     entry_points={"console_scripts": ["sam2lca = sam2lca.cli:cli"]},
