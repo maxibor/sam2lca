@@ -96,7 +96,7 @@ class Alignment:
             check_conserved(bool): Check if read is mapped in conserved region
             process(int): Number of processes
         """
-        total_reads = int(pysam.view("-c", self.al_file).rstrip())
+        total_reads = int(pysam.view("-c", f"-@ {process}", self.al_file).rstrip())
         al_file = pysam.AlignmentFile(self.al_file, self.mode, threads=process)
         for read in tqdm(al_file, unit="reads", total=total_reads):
             if read.has_tag("NM") and not read.is_unmapped:
