@@ -1,12 +1,13 @@
 import os
 import json
 import rocksdb
-from sam2lca.config import NCBI
+from taxopy import Taxon
 import pandas as pd
 import logging
 import warnings
 from collections import Counter, ChainMap
-from tqdm.contrib.concurrent import process_map
+from tqdm.contrib.concurrent import thread_map
+from functools import partial
 
 warnings.simplefilter(action="ignore", category=FutureWarning)
 
@@ -55,7 +56,7 @@ def check_extension(filename):
         raise Exception(f"{extension} file extension not supported")
 
 
-def taxid_to_lineage_single(taxid_items):
+def taxid_to_lineage_single(taxid_items, taxo_db):
     """Retrieve Taxonomic lineage and species name from NCBI TAXID
 
     Args:
@@ -65,12 +66,10 @@ def taxid_to_lineage_single(taxid_items):
     """
     try:
         taxid, read_count = taxid_items
-        sciname = NCBI.get_taxid_translator([taxid])[taxid]
-        rank = NCBI.get_rank([taxid])[taxid]
-        taxid_lineage = NCBI.get_lineage(taxid)
-        scinames = NCBI.get_taxid_translator(taxid_lineage)
-        ranks = NCBI.get_rank(taxid_lineage)
-        lineage = [{ranks[taxid]: scinames[taxid]} for taxid in taxid_lineage]
+        taxon = Taxon(taxid, taxo_db)
+        sciname = taxon.name
+        rank = taxon.rank
+        lineage = taxon.rank_name_dictionary
     except Exception:
         sciname = "NA"
         rank = "NA"
@@ -85,12 +84,14 @@ def taxid_to_lineage_single(taxid_items):
     }
 
 
-def taxid_to_lineage(taxid_count_dict, output, process, nb_steps):
+def taxid_to_lineage(taxid_count_dict, output, process, nb_steps, taxo_db):
     logging.info(
         f"Step {6 if nb_steps == 7 else 7 }/{nb_steps}: Converting TAXIDs to taxonomic lineages"
     )
-    res = process_map(
-        taxid_to_lineage_single,
+
+    taxid_to_lineage_single_partial = partial(taxid_to_lineage_single, taxo_db=taxo_db)
+    res = thread_map(
+        taxid_to_lineage_single_partial,
         taxid_count_dict.items(),
         chunksize=1,
         max_workers=process,

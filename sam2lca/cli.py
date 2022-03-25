@@ -108,7 +108,7 @@ def analyze(ctx, no_args_is_help=True, **kwargs):
 
 @cli.command()
 @click.pass_context
-@click.option("-n", "--ncbi", is_flag=True, help="Update NCBI taxonomy tree")
+@click.option("-u", "--update", is_flag=True, help="Update NCBI taxonomy database")
 def update_db(ctx, no_args_is_help=True, **kwargs):
     """Download/prepare mappings and taxonomy databases"""
     update_database(**ctx.obj, **kwargs)

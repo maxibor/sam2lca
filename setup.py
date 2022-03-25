@@ -33,7 +33,7 @@ setup(
         "tqdm",
         "xopen",
         "python-rocksdb",
-        "ete3",
+        "taxopy",
         "pandas",
     ],
     packages=find_packages(include=["sam2lca"]),

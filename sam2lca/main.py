@@ -1,9 +1,10 @@
+from glob import glob
 from sam2lca.sam_pysam import Alignment
 from sam2lca.ncbi_to_taxid import get_mapping
 from sam2lca.mapfiles import get_map_config, base_map_config
-from sam2lca.sam_ete import compute_lca_multi
+from sam2lca.lca import compute_lca
 from sam2lca import utils
-from sam2lca.config import NCBI
+from sam2lca.config import setup_taxopy_db
 from sam2lca.write_alignment import write_bam_tags
 from pathlib import Path
 import logging
@@ -40,6 +41,8 @@ def sam2lca(
     nb_steps = 8 if conserved else 7
     process = cpu_count() if process == 0 else process
 
+    TAXDB = setup_taxopy_db(db_path=dbdir)
+
     if map_config is None:
         map_config = base_map_config
     else:
@@ -67,34 +70,40 @@ def sam2lca(
         check_conserved=conserved,
     )
 
-    reads_taxid_dict = compute_lca_multi(read_dict, tree, process, nb_steps)
+    reads_taxid_dict = compute_lca(read_dict, process, nb_steps, taxo_db=TAXDB)
     taxid_counts = utils.count_reads_taxid(reads_taxid_dict)
     utils.taxid_to_lineage(
-        taxid_counts, output["sam2lca"], process=process, nb_steps=nb_steps
+        taxid_counts,
+        output["sam2lca"],
+        process=process,
+        nb_steps=nb_steps,
+        taxo_db=TAXDB,
     )
     if bam_out:
         write_bam_tags(sam, output["bam"], reads_taxid_dict)
 
 
-def update_database(mappings, dbdir, ncbi, map_config=None):
+def update_database(mappings, dbdir, update, map_config=None):
     """Performs LCA on SAM/BAM/CRAM alignment file
 
     Args:
         mappings (str): Type of Acc2Tax mapping
         dbdir (str): Path to database stroring directory
-        ncbi (bool): Updates NCBI taxonomic tree
+        update (bool): Updates taxonomic database
         map_config(str): Path to map_config json file
     """
-    logging.info("Downloading/updating database")
+    logging.info("* Downloading/updating acc2tax database ")
 
     if map_config is None:
         map_config = base_map_config
     else:
         map_config = get_map_config(map_config_file=map_config)
 
-    if ncbi:
-        NCBI.update_taxonomy_database()
     get_mapping(map_config=map_config, maptype=mappings, dbdir=dbdir, update=True)
+
+    logging.info("* Setting up taxonomy database")
+    print(dbdir)
+    TAXDB = setup_taxopy_db(db_path=dbdir)
 
 
 if __name__ == "__main__":

@@ -1,8 +1,21 @@
-import ete3
+from taxopy import TaxDb
 import rocksdb
 
-# global NCBI
-NCBI = ete3.NCBITaxa()
+
+def setup_taxopy_db(db_path, nodes=None, names=None, merged=None):
+    """Setup taxopy database
+
+    Args:
+        db_path (str): Path to taxopy database
+        nodes (str, optional): Path to nodes.dmp . Defaults to None.
+        name (str, optional): Path to names.dmp. Defaults to None.
+        merged (str, optional): Path to merged.dmp . Defaults to None.
+
+    Returns:
+        taxopy.TaxDb: Taxonomy database
+    """
+    return TaxDb(taxdb_dir=db_path, keep_files=True)
+
 
 OPTS_create = rocksdb.Options()
 OPTS_create.create_if_missing = True
