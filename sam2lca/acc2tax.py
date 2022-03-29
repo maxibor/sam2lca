@@ -59,12 +59,13 @@ def get_map_config(
         base_config (dict): Default map_config
     Returns:
         dict: map_config
+        acc2tax_name: name of new acc2tax db
     """
 
     with open(map_config_file, "r") as f:
         config = json.load(f)
-
+    acc2tax_name = config["names"].keys()
     for k in base_config:
         base_config[k].update(config[k])
 
-    return base_config
+    return base_config, acc2tax_name
