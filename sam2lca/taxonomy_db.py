@@ -32,10 +32,16 @@ def setup_taxopy_db(db_path, db_type="NCBI", nodes=None, names=None, merged=None
             remove(f"{db_path}/{file}")
         except FileNotFoundError:
             continue
+    if db_type == "custom" and not nodes and not names and not merged:
+        logging_error(
+            "Custom taxonomy database cannot be created without specifying nodes.dmp, names.dmp, and merged.dmp files"
+        )
+        sys_exit(1)
     try:
+        kf = True if db_type == "custom" else False
         TAXDB = TaxDb(
             taxdb_dir=db_path,
-            keep_files=False,
+            keep_files=kf,
             nodes_dmp=nodes,
             names_dmp=names,
             merged_dmp=merged,
