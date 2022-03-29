@@ -1,25 +1,23 @@
-from glob import glob
 from sam2lca.sam_pysam import Alignment
-from sam2lca.ncbi_to_taxid import get_mapping
-from sam2lca.mapfiles import get_map_config, base_map_config
+from sam2lca.acc2tax_rocksdb import get_mapping
+from sam2lca.acc2tax import get_map_config, base_map_config
 from sam2lca.lca import compute_lca
 from sam2lca import utils
-from sam2lca.config import setup_taxopy_db
+from sam2lca.taxonomy_db import setup_taxopy_db, load_taxonomy_db
 from sam2lca.write_alignment import write_bam_tags
 from pathlib import Path
 import logging
 from multiprocessing import cpu_count
+import sys
+import os
 
 
 def sam2lca(
     sam,
-    mappings,
-    map_config=None,
     output=None,
     dbdir=f"{str(Path.home())}/.sam2lca",
-    names=None,
-    nodes=None,
-    merged=None,
+    taxonomy="ncbi",
+    acc2tax="nucl",
     process=2,
     identity=0.8,
     length=30,
@@ -30,13 +28,10 @@ def sam2lca(
 
     Args:
         sam (str): Path to SAM/BAM/CRAM alignment file
-        mappings (str): Type of Acc2Tax mapping
-        map_config(str): Path to map_config json file
         output(str): Path to sam2lca output file
         dbdir (str): Path to database storing directory
-        names(str): names.dmp file for taxonomy database. None loads the NCBI taxonomy database
-        nodes(str): nodes.dmp file for taxonomy database. None loads the NCBI taxonomy database
-        merged(str): merged.dmp file for taxonomy database. None loads the NCBI taxonomy database
+        taxonomy(str): Type of Taxonomy database
+        acc2tax(str): Type of acc2tax database
         process (int): Number of process for parallelization
         identity(float): Minimum identity
         length(int): Minimum alignment length
@@ -45,25 +40,32 @@ def sam2lca(
     nb_steps = 8 if conserved else 7
     process = cpu_count() if process == 0 else process
 
-    print(names, nodes, merged)
+    avail_taxo, avail_acc2tax = list_available_db(dbdir)
+    if taxonomy not in avail_taxo:
+        logging.info(
+            f"Taxonomy database {taxonomy} not installed. I'm trying to create it for you"
+        )
+        setup_taxopy_db(
+            db_path=dbdir,
+            db_type=taxonomy,
+        )
+    if acc2tax not in avail_acc2tax:
+        logging.info(
+            f"Acc2tax database {acc2tax} not installed. I'm trying to create it for you"
+        )
+        get_mapping(map_config=base_map_config, maptype=acc2tax, dbdir=dbdir)
+    logging.info(
+        f"Step 1/{nb_steps}: Loading {taxonomy} taxonomy database and {acc2tax} acc2tax database"
+    )
+    TAXDB = load_taxonomy_db(dbdir, taxonomy)
 
-    logging.info(f"Step 1/{nb_steps}: Loading taxonomy database")
-
-    TAXDB = setup_taxopy_db(db_path=dbdir, names=names, nodes=nodes, merged=merged)
-
-    if map_config is None:
-        map_config = base_map_config
-    else:
-        map_config = get_map_config(map_config_file=map_config)
-
-    acc2tax_db = f"{dbdir}/{map_config['map_db'][mappings]}"
+    acc2tax_db = f"{dbdir}/{acc2tax}.db"
     p = Path(acc2tax_db)
     if not p.exists():
-        logging.info(
-            f"\t'{acc2tax_db}' database seems to be missing, I'm creating it for you."
+        logging.error(
+            f"\t'{acc2tax_db}' database seems to be missing, please check your inputs"
         )
-        get_mapping(map_config=map_config, maptype=mappings, dbdir=dbdir, update=False)
-
+        sys.exit(1)
     if not output:
         output = utils.output_file(sam)
     else:
@@ -91,27 +93,74 @@ def sam2lca(
         write_bam_tags(sam, output["bam"], reads_taxid_dict)
 
 
-def update_database(mappings, dbdir, update, map_config=None):
+def update_database(
+    dbdir=f"{str(Path.home())}/.sam2lca",
+    taxonomy=None,
+    taxo_names=None,
+    taxo_nodes=None,
+    taxo_merged=None,
+    acc2tax="nucl",
+    acc2tax_json=None,
+):
     """Performs LCA on SAM/BAM/CRAM alignment file
 
     Args:
-        mappings (str): Type of Acc2Tax mapping
-        dbdir (str): Path to database stroring directory
-        update (bool): Updates taxonomic database
-        map_config(str): Path to map_config json file
+
+        dbdir (str): Path to database storing directory
+        taxonomy(str): Type of Taxonomy database
+        names(str): names.dmp file for taxonomy database. None loads the NCBI taxonomy database
+        nodes(str): nodes.dmp file for taxonomy database. None loads the NCBI taxonomy database
+        merged(str): merged.dmp file for taxonomy database. None loads the NCBI taxonomy database
+        acc2tax(str): Type of acc2tax database
+        acc2tax_json(str): Path to acc2tax json file
     """
-    logging.info("* Downloading/updating acc2tax database ")
 
-    if map_config is None:
+    if acc2tax_json is None and acc2tax is not None:
         map_config = base_map_config
+    elif acc2tax == "json":
+        map_config, acc2tax = get_map_config(map_config_file=map_config)
+    if acc2tax is not None:
+        logging.info("* Downloading/updating acc2tax {acc2tax} database ")
+        get_mapping(map_config=map_config, maptype=acc2tax, dbdir=dbdir)
+
+    if taxonomy:
+        logging.info(f"* Setting up {taxonomy} taxonomy database")
+        setup_taxopy_db(
+            db_path=dbdir,
+            db_type=taxonomy,
+            nodes=taxo_nodes,
+            names=taxo_names,
+            merged=taxo_merged,
+        )
+
+
+def list_available_db(dbdir, verbose=False):
+    """List available taxonomy databases
+
+    Args:
+        db_dir(str): Path to sam2lca database directory
+
+    Returns:
+        list: List of available taxonomy databases
+        list: List of available acc2tax databases
+    """
+    taxo_db = []
+    acc2tax_db = []
+    if os.path.exists(dbdir):
+        for file in os.listdir(dbdir):
+            if file.endswith(".pkl"):
+                taxo_db.append(file.split(".")[0])
+                continue
+            if file.endswith(".db"):
+                acc2tax_db.append(file.split(".")[0])
+                continue
+        if verbose:
+            logging.info(f"* Available taxonomy databases: {', '.join(taxo_db)}")
+            logging.info(f"* Available acc2tax databases: {', '.join(acc2tax_db)}")
+        return taxo_db, acc2tax_db
     else:
-        map_config = get_map_config(map_config_file=map_config)
-
-    get_mapping(map_config=map_config, maptype=mappings, dbdir=dbdir, update=True)
-
-    logging.info("* Setting up taxonomy database")
-    print(dbdir)
-    TAXDB = setup_taxopy_db(db_path=dbdir)
+        logging.error(f"* {dbdir} does not exist, please create sam2lca database first")
+        sys.exit(1)
 
 
 if __name__ == "__main__":
