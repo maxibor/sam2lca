@@ -54,9 +54,7 @@ def sam2lca(
             f"Acc2tax database {acc2tax} not installed. I'm trying to create it for you"
         )
         get_mapping(map_config=base_map_config, maptype=acc2tax, dbdir=dbdir)
-    logging.info(
-        f"Step 1/{nb_steps}: Loading {taxonomy} taxonomy database and {acc2tax} acc2tax database"
-    )
+    logging.info(f"Step 1/{nb_steps}: Loading taxonomy database")
     TAXDB = load_taxonomy_db(dbdir, taxonomy)
 
     acc2tax_db = f"{dbdir}/{acc2tax}.db"
