@@ -35,5 +35,10 @@ jobs:
       - name: Check sam2lca on test data
         shell: bash -l {0}
         run: |
-          sam2lca -m test update-db
-          sam2lca -m test analyze --nodes tests/data/taxonomy/nodes.dmp --names tests/data/taxonomy/names.dmp --merged tests/data/taxonomy/merged.dmp tests/data/aligned.sorted.bam
+          sam2lca update-db --taxonomy custom \
+            --taxo_nodes tests/data/taxonomy/nodes.dmp \
+            --taxo_names  tests/data/taxonomy/names.dmp \
+            --taxo_merged tests/data/taxonomy/merged.dmp \
+            --acc2tax test
+          sam2lca list-db
+          sam2lca analyze -a test -t custom tests/data/aligned.sorted.bam
