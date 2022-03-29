@@ -85,10 +85,16 @@ samtools index metagenome.cleaned.sorted.bam
 
 Once we have our alignment file, here in `bam` format, we can now run [sam2lca](https://github.com/maxibor/sam2lca) to identify which plants shed some of its DNA in our sequencing file.
 
-First, we need to set up the sam2lca database for *plant markers*
+First, we need to set up the sam2lca acc2tax database for *plant markers*, with NCBI taxonomic identifiers
 
 ```bash
-sam2lca -m plant_markers update-db
+sam2lca update-db --taxonomy ncbi --acc2tax plant_markers
+```
+
+Let's check which sam2lca databases are now available:
+
+```bash
+sam2lca list-db
 ```
 
 Finally, run sam2lca with the *plant markers* database.
@@ -96,7 +102,7 @@ Finally, run sam2lca with the *plant markers* database.
 > To make sure that we don't accidentally run the LCA algorithm on DNA sequences that are unlikely to belong to the same clade, we will only run the LCA for all references aligned to each read that have a identity greater than 90%. Depending on the type of database, you might want to play with sequence identity threshold.
 
 ```bash
-sam2lca -m plant_markers analyze -b -i 0.9 metagenome.cleaned.sorted.bam
+sam2lca analyze --acc2tax plant_markers -b -i 0.9 metagenome.cleaned.sorted.bam
 ```
 
 Let's look at the results, for example the file `metagenome.sorted.sam2lca.csv`
