@@ -20,9 +20,13 @@ def taxids_to_lca(read_dict_item, taxo_db):
         taxids (frozenset): frozenset of taxids
     """
     read, taxids = read_dict_item
+    try:
+        taxids.remove(0)
+    except KeyError:
+        pass
     if len(taxids) == 1:
         ancestor = tuple(taxids)[0]
-    else:
+    elif len(taxids) > 1:
         try:
             ancestor = find_lca(
                 [create_taxopy(i, taxo_db=taxo_db) for i in taxids], taxo_db
@@ -31,6 +35,8 @@ def taxids_to_lca(read_dict_item, taxo_db):
             logging.error(e)
             logging.error(taxids)
             ancestor = 0
+    else:
+        ancestor = 0
 
     ANCESTORS_DICT.update({read: ancestor})
 

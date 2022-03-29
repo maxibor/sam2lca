@@ -22,11 +22,15 @@ def accession_to_taxid_lookup(accession_list):
     Returns:
         dict: {accession: taxid}
     """
-    try:
-        return {i: int(DB.get(bytes(i, encoding="utf8"))) for i in tqdm(accession_list)}
-    except TypeError as e:
-        logging.error(e)
-        return None
+    acc2tax = dict()
+    for i in tqdm(accession_list):
+        try:
+            acc2tax[i] = int(DB.get(bytes(i, encoding="utf8")))
+        except TypeError as e:
+            # logging.error(f"{i} not found in acc2tax DB", e)
+            logging.error(f"{i} not found in acc2tax DB")
+            continue
+    return acc2tax
 
 
 class Alignment:
