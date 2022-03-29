@@ -7,7 +7,7 @@ from sam2lca.check_conserved_regions import (
     is_in_conserved,
 )
 import rocksdb
-from sam2lca.config import OPTS_read
+from sam2lca.rocksdb_config import OPTS_read
 from tqdm.contrib.concurrent import process_map
 import logging
 from tqdm import tqdm
@@ -52,7 +52,7 @@ class Alignment:
         alignment.close()
 
     def get_refs_taxid(self, dbname):
-        """Get taxids of referernce sequences
+        """Get taxids of reference sequences
 
         Args:
             dbname (str): Path of RocksDB acc2tax database
