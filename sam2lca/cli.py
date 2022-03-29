@@ -21,9 +21,9 @@ from pathlib import Path
 )
 def cli(ctx, dbdir):
     """\b
-    sam2lca: Last Common Ancestor on SAM/BAM/CRAM alignment files
-    Author: Maxime Borry
-    Contact: <borry[at]shh.mpg.de>
+    sam2lca: Lowest Common Ancestor on SAM/BAM/CRAM alignment files
+    Author: Maxime Borry, Alexander Huebner
+    Contact: <maxime_borry[at]eva.mpg.de>
     Homepage & Documentation: github.com/maxibor/sam2lca
     """
     ctx.ensure_object(dict)

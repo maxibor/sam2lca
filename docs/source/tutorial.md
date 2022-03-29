@@ -23,11 +23,13 @@ conda activate sam2lca_tutorial
 
 ## Getting the reference database
 
-First we need to download and decompress the Angiosperms353 database, which has already been pre-formatted for sam2lca
+First we need to download and decompress the reference `fasta` database, which in this case, has already been pre-formatted for sam2lca.
+
+> For the sake of this tutorial, we use a reduced version of the [angiosperms353](https://academic.oup.com/sysbio/article/68/4/594/5237557) marker set. The full version is available for download, see [sam2lca.readthedocs.io/en/latest/databases.html](https://sam2lca.readthedocs.io/en/latest/databases.html).  
 
 ```bash
-wget -O angiosperms353_markers.fa.gz https://edmond.mpdl.mpg.de/api/access/datafile/101862
-gunzip angiosperms353_markers.fa.gz
+wget https://raw.githubusercontent.com/maxibor/sam2lca/master/docs/tutorial/data/tutorial_db.fa.gz
+gunzip tutorial_db.fa.gz
 ```
 
 ## Indexing the database with Bowtie2
@@ -37,10 +39,10 @@ In this tutorial, we're going to work with the [Bowtie2](https://github.com/BenL
 Before doing any alignment, we need to index the angiosperms353 database with bowtie2
 
 ```bash
-bowtie2-build angiosperms353_markers.fa angiosperms353
+bowtie2-build tutorial_db.fa angiosperms353
 ```
 
-> This step might be a bit long, because of the many references present in this database, you may want to speed it up by parallelizing it using the `--threads` option.
+> This step might be a bit long, especially if you have many references present in your database. You may want to speed it up by parallelizing it using the `--threads` option.
 
 ## Preparing `fastq` sequencing files
 
@@ -75,6 +77,8 @@ Like many other tools working with `bam`/`cram` files, [sam2lca](https://github.
 However, because we aligned our sequencing data against a database containing (most likely) a lot more reference sequences than what we can potentially align our reads to, the index of the file, based on the `bam`/`cram` header is huge and will slow down the [I/O](https://en.wikipedia.org/wiki/Input/output) by many folds.
 
 To circumvent this, we advise you to run [bamAlignCleaner](https://github.com/maxibor/bamAlignCleaner) on your alignment files, and then reindexing them, before processing them further with sam2lca.
+
+> For the sake of the tutorial, we use a smaller `fasta` reference sequence database. This step is therefore not really necessary in this tutorial.
 
 ```bash
 bamAlignCleaner metagenome.sorted.bam | samtools sort > metagenome.cleaned.sorted.bam

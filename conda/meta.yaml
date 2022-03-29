@@ -21,7 +21,7 @@ requirements:
     - python
     - click >=7.0
     - pip >=20.0.2
-    - bioconda::taxopy >=0.9.2
+    - bioconda::taxopy=0.9.2
     - bioconda::pysam >=0.15.2
     - conda-forge::rocksdb >=6.10.1
     - conda-forge::python-rocksdb >=0.7.0

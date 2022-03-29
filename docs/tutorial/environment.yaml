@@ -6,6 +6,6 @@ channels:
 dependencies:
   - bowtie2=2.4.5
   - fastp=0.23.2
-  - sam2lca=0.3.3
+  - sam2lca=0.4.0
   - samtools=1.15
   - bamaligncleaner=0.2.2

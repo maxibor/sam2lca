@@ -6,7 +6,6 @@ channels:
 dependencies:
   - alabaster=0.7.12
   - click=7.1.2
-  - ete3=3.1.2
   - nbsphinx=0.8.1
   - pandas=1.2.1
   - pandoc=2.11.4
@@ -29,3 +28,4 @@ dependencies:
   - sphinxcontrib-serializinghtml=1.1.4
   - tqdm=4.56.0
   - xopen=1.1
+  - taxopy=0.9.2

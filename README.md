@@ -4,9 +4,9 @@
 
 [Lowest Common Ancestor](https://en.wikipedia.org/wiki/Lowest_common_ancestor) from a SAM/BAM/CRAM sequence alignment file
 
-## Quick start
+## TLDR
 
-Quick analyis of sequencing reads aligned to a DNA database
+Analysis of sequencing reads aligned to a DNA database with NCBI accession numbers, using the NCBI taxonomy
 
 ```bash
 sam2lca analyze myfile.bam
@@ -17,6 +17,7 @@ See all options
 ```bash
 sam2lca --help
 sam2lca update-db --help
+sam2lca list-db --help
 sam2lca analyze --help
 ```
 
@@ -44,6 +45,12 @@ git checkout dev
 conda env create -f environment.yml
 conda activate sam2lca
 pip install -e .
+```
+
+or
+
+```bash
+pip install git+ssh://git@github.com/maxibor/sam2lca.git@dev
 ```
 
 ## Documentation

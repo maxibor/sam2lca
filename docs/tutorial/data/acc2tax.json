@@ -7,14 +7,6 @@
         ]
     },
     "mapmd5": {
-        "nucl": [
-            "https://ftp.ncbi.nlm.nih.gov/pub/taxonomy/accession2taxid/nucl_gb.accession2taxid.gz.md5",
-            "https://ftp.ncbi.nlm.nih.gov/pub/taxonomy/accession2taxid/nucl_wgs.accession2taxid.gz.md5"
-        ],
-        "prot": [
-            "https://ftp.ncbi.nlm.nih.gov/pub/taxonomy/accession2taxid/pdb.accession2taxid.gz.md5",
-            "https://ftp.ncbi.nlm.nih.gov/pub/taxonomy/accession2taxid/prot.accession2taxid.gz.md5"
-        ],
         "plant_markers": [
             "https://raw.githubusercontent.com/maxibor/sam2lca/master/sam2lca/data/angiosperms353.accession2taxid.gz.md5",
             "https://raw.githubusercontent.com/maxibor/sam2lca/master/sam2lca/data/ITS.accession2taxid.gz.md5",
@@ -22,8 +14,6 @@
         ]
     },
     "map_db": {
-        "nucl": "nucl.db",
-        "prot": "prot.db",
         "plant_markers": "plant_markers.db"
     }
 }

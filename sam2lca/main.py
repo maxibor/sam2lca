@@ -40,18 +40,20 @@ def sam2lca(
     nb_steps = 8 if conserved else 7
     process = cpu_count() if process == 0 else process
 
+    Path(dbdir).mkdir(exist_ok=True)
+
     avail_taxo, avail_acc2tax = list_available_db(dbdir)
     if taxonomy not in avail_taxo:
         logging.info(
-            f"Taxonomy database {taxonomy} not installed. I'm trying to create it for you"
+            f"{taxonomy} taxonomy database is not installed. I'm trying to create it for you"
         )
         setup_taxopy_db(
-            db_path=dbdir,
+            dbdir=dbdir,
             db_type=taxonomy,
         )
     if acc2tax not in avail_acc2tax:
         logging.info(
-            f"Acc2tax database {acc2tax} not installed. I'm trying to create it for you"
+            f"{acc2tax} acc2tax database is ls not installed. I'm trying to create it for you"
         )
         get_mapping(map_config=base_map_config, maptype=acc2tax, dbdir=dbdir)
     logging.info(f"Step 1/{nb_steps}: Loading taxonomy database")
@@ -124,7 +126,7 @@ def update_database(
     if taxonomy:
         logging.info(f"* Setting up {taxonomy} taxonomy database")
         setup_taxopy_db(
-            db_path=dbdir,
+            dbdir=dbdir,
             db_type=taxonomy,
             nodes=taxo_nodes,
             names=taxo_names,
