@@ -12,20 +12,24 @@ from tqdm.contrib.concurrent import process_map
 import logging
 from tqdm import tqdm
 from collections import ChainMap
+from taxopy import Taxon
 
 
-def accession_to_taxid_lookup(accession_list):
+def accession_to_taxid_lookup(accession_list, taxo_db):
     """Get TAXID of hits from hit accessions per read
 
     Args:
         accession list (list): list of unique accession numbers
     Returns:
         dict: {accession: taxid}
+        taxo_db (taxopy database): taxonomy database
     """
     acc2tax = dict()
     for i in tqdm(accession_list):
         try:
-            acc2tax[i] = int(DB.get(bytes(i, encoding="utf8")))
+            taxid = int(DB.get(bytes(i, encoding="utf8")))
+            if taxid != 0 :
+                acc2tax[i] = Taxon(taxid, taxo_db)
         except TypeError as e:
             # logging.error(f"{i} not found in acc2tax DB", e)
             logging.error(f"{i} not found in acc2tax DB")
@@ -55,11 +59,12 @@ class Alignment:
         self.refs = tuple(present_refs)
         alignment.close()
 
-    def get_refs_taxid(self, dbname):
+    def get_refs_taxid(self, acc2tax_dbname, taxo_db):
         """Get taxids of reference sequences
 
         Args:
-            dbname (str): Path of RocksDB acc2tax database
+            acc2tax_dbname (str): Path of RocksDB acc2tax database
+            taxo_db (taxopy database): taxonomy database
         Returns:
             dict: {ref: taxid}
         """
@@ -67,10 +72,10 @@ class Alignment:
         global DB
 
         logging.info(f"Step 2/{self.nb_steps}: Loading acc2tax database")
-        DB = rocksdb.DB(dbname, opts=OPTS_read, read_only=True)
+        DB = rocksdb.DB(acc2tax_dbname, opts=OPTS_read, read_only=True)
 
         logging.info(f"Step 3/{self.nb_steps}: Converting accession numbers to TAXIDs")
-        self.acc2tax = accession_to_taxid_lookup(self.refs)
+        self.acc2tax = accession_to_taxid_lookup(self.refs, taxo_db)
 
         del DB
 

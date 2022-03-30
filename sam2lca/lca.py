@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 
 from functools import partial
-from taxopy import Taxon, find_lca
+from taxopy import find_lca
 from taxopy.core import TaxidError
 from tqdm.contrib.concurrent import process_map, thread_map
 import logging
@@ -25,12 +25,10 @@ def taxids_to_lca(read_dict_item, taxo_db):
     except KeyError:
         pass
     if len(taxids) == 1:
-        ancestor = tuple(taxids)[0]
+        ancestor = tuple(taxids)[0].taxid
     elif len(taxids) > 1:
         try:
-            ancestor = find_lca(
-                [create_taxopy(i, taxo_db=taxo_db) for i in taxids], taxo_db
-            ).taxid
+            ancestor = find_lca(tuple(taxids), taxo_db).taxid
         except TaxidError as e:
             logging.error(e)
             logging.error(taxids)

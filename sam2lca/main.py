@@ -72,7 +72,7 @@ def sam2lca(
         output = utils.output_file(output)
     utils.check_extension(sam)
     al = Alignment(al_file=sam, nb_steps=nb_steps)
-    al.get_refs_taxid(acc2tax_db)
+    al.get_refs_taxid(acc2tax_db, TAXDB)
     read_dict = al.get_reads(
         process=process,
         identity=identity,
