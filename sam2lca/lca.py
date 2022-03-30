@@ -3,15 +3,8 @@
 from functools import partial
 from taxopy import find_lca
 from taxopy.core import TaxidError
-from tqdm.contrib.concurrent import process_map, thread_map
+from tqdm.contrib.concurrent import thread_map
 import logging
-import sys
-from collections import ChainMap
-
-
-def create_taxopy(taxid, taxo_db):
-    return Taxon(taxid, taxo_db)
-
 
 def taxids_to_lca(read_dict_item, taxo_db):
     """Run LCA on list of TAXID
