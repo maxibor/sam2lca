@@ -90,7 +90,13 @@ def sam2lca(
         taxo_db=TAXDB,
     )
     if bam_out:
-        write_bam_tags(sam, output["bam"], reads_taxid_dict)
+        write_bam_tags(
+            infile=sam,
+            outfile=output["bam"],
+            read_taxid_dict=reads_taxid_dict,
+            identity=identity,
+            minlength=length,
+        )
 
 
 def update_database(
