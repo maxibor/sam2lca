@@ -96,7 +96,7 @@ class Alignment:
         conserved_regions = flag_conserved_regions(refcov, window_size=window_size)
         return {ref: conserved_regions}
 
-    def __get_reads_refs__(self, identity, minlength, check_conserved, process):
+    def __get_reads_refs__(self, identity, minlength, check_conserved, process, unclassified_taxid=12908):
         """Get reads passing identity threshold for each reference
 
         Args:
@@ -126,8 +126,8 @@ class Alignment:
                                 ).add(self.acc2tax[read.reference_name])
                             except KeyError:
                                 self.read_ref_dict.setdefault(
-                                    read.query_name, set({0})
-                                ).add(0)
+                                    read.query_name, set({unclassified_taxid})
+                                ).add(unclassified_taxid)
 
                     else:
                         try:
@@ -137,8 +137,8 @@ class Alignment:
                             ).add(self.acc2tax[read.reference_name])
                         except KeyError:
                             self.read_ref_dict.setdefault(
-                                read.query_name, set({0})
-                            ).add(0)
+                                read.query_name, set({unclassified_taxid})
+                            ).add(unclassified_taxid)
         al_file.close()
 
     def get_reads(self, process=2, identity=0.9, minlength=30, check_conserved=False):

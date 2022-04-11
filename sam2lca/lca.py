@@ -6,7 +6,8 @@ from taxopy.core import TaxidError
 from tqdm.contrib.concurrent import thread_map
 import logging
 
-def taxids_to_lca(read_dict_item, taxo_db):
+
+def taxids_to_lca(read_dict_item, taxo_db, unclassified_taxid=12908):
     """Run LCA on list of TAXID
 
     Args:
@@ -25,9 +26,9 @@ def taxids_to_lca(read_dict_item, taxo_db):
         except TaxidError as e:
             logging.error(e)
             logging.error(taxids)
-            ancestor = 0
+            ancestor = unclassified_taxid
     else:
-        ancestor = 0
+        ancestor = unclassified_taxid
 
     ANCESTORS_DICT.update({read: ancestor})
 
