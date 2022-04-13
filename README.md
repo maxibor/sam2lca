@@ -2,7 +2,7 @@
 
 # sam2lca
 
-[Lowest Common Ancestor](https://en.wikipedia.org/wiki/Lowest_common_ancestor) from a SAM/BAM/CRAM sequence alignment file
+[Lowest Common Ancestor](https://en.wikipedia.org/wiki/Lowest_common_ancestor) from a [SAM/BAM/CRAM](<https://en.wikipedia.org/wiki/SAM_(file_format>) sequence alignment file.
 
 ## TLDR
 
