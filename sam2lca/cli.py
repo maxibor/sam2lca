@@ -1,6 +1,5 @@
 #!/usr/bin/env python3
 
-from email.policy import default
 import click
 from sam2lca import __version__
 from sam2lca.main import sam2lca, update_database, list_available_db
