@@ -55,6 +55,29 @@ def check_extension(filename):
     except KeyError:
         raise Exception(f"{extension} file extension not supported")
 
+def reassign_count_lineage(taxid_items, read_taxid_dict_reassign, taxo_db):
+    """Compute total counts of reads matching to taxons and their descendants
+
+    Args:
+        taxid_items (dict_item): (TAXID(int), read_count(int))
+    """
+    try:
+        taxid, read_count = taxid_items
+        taxon = Taxon(taxid, taxo_db)
+        lineage = taxon.taxid_lineage
+    except Exception:
+        read_taxid_dict_reassign[taxid] = [read_count, read_count]
+
+    if taxid not in read_taxid_dict_reassign:
+        read_taxid_dict_reassign[taxid] = [read_count, 0]
+    else:
+        read_taxid_dict_reassign[taxid][0] = read_count
+    for t in lineage:
+        if t not in read_taxid_dict_reassign:
+            read_taxid_dict_reassign[t] = [0, read_count]
+        else:
+            read_taxid_dict_reassign[t][1] += read_count
+
 
 def taxid_to_lineage_single(taxid_items, taxo_db):
     """Retrieve Taxonomic lineage and species name from NCBI TAXID
@@ -65,7 +88,8 @@ def taxid_to_lineage_single(taxid_items, taxo_db):
         {taxid(int): {"name":taxon_name(str), "rank":taxon_rank(str), "count":read_count(int), "lineage":taxon_lineage(list)}}
     """
     try:
-        taxid, read_count = taxid_items
+        taxid, read_counts = taxid_items
+        read_count_taxon, read_count_descendant = read_counts
         taxon = Taxon(taxid, taxo_db)
         sciname = taxon.name
         rank = taxon.rank
@@ -74,25 +98,42 @@ def taxid_to_lineage_single(taxid_items, taxo_db):
         sciname = "NA"
         rank = "NA"
         lineage = "NA"
+
     return {
         taxid: {
+            "taxon" = taxon
             "name": sciname,
             "rank": rank,
-            "count": read_count,
+            "count_taxon": read_count_taxon,
+            "count_descendant": read_count_descendant,
             "lineage": lineage,
         }
     }
 
 
+
+ 
+
 def taxid_to_lineage(taxid_count_dict, output, process, nb_steps, taxo_db):
     logging.info(
         f"Step {6 if nb_steps == 7 else 7 }/{nb_steps}: Converting TAXIDs to taxonomic lineages"
     )
+    
+    read_taxid_dict_reassign = dict()
+    reassign_count_lineage_partial = partial(
+        reassign_count_lineage, 
+        read_taxid_dict_reassign = read_taxid_dict_reassign, 
+        taxo_db=taxo_db)    
+    thread_map(
+        reassign_count_lineage_partial, 
+        taxid_count_dict.items(), 
+        chunksize=1,
+        max_workers=process)
 
     taxid_to_lineage_single_partial = partial(taxid_to_lineage_single, taxo_db=taxo_db)
     res = thread_map(
         taxid_to_lineage_single_partial,
-        taxid_count_dict.items(),
+        read_taxid_dict_reassign.items(),
         chunksize=1,
         max_workers=process,
     )
