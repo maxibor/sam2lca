@@ -105,28 +105,28 @@ def analyze(ctx, no_args_is_help=True, **kwargs):
 @click.pass_context
 @click.option(
     "--taxonomy",
-    type=click.Choice(["ncbi", "custom"], case_sensitive=False),
-    default=None,
+    type=str,
+    default="ncbi",
     show_default=True,
-    help="Type of taxonomy database to create",
+    help="Name of taxonomy database to create",
 )
 @click.option(
     "--taxo_names",
     type=click.Path(readable=True, dir_okay=False, file_okay=True),
     default=None,
-    help="names.dmp file for Taxonomy database (optional). Only needed for custom taxonomy database",
+    help="names.dmp file for Taxonomy database (optional). Only needed for custom taxonomy database (non ncbi)",
 )
 @click.option(
     "--taxo_nodes",
     type=click.Path(readable=True, dir_okay=False, file_okay=True),
     default=None,
-    help="nodes.dmp file for Taxonomy database (optional). Only needed for custom taxonomy database",
+    help="nodes.dmp file for Taxonomy database (optional). Only needed for custom taxonomy database (non ncbi)",
 )
 @click.option(
     "--taxo_merged",
     type=click.Path(readable=True, dir_okay=False, file_okay=True),
     default=None,
-    help="merged.dmp file for Taxonomy database (optional). Only needed for custom taxonomy database",
+    help="merged.dmp file for Taxonomy database (optional). Only needed for custom taxonomy database (non ncbi)",
 )
 @click.option(
     "--acc2tax",
