@@ -82,7 +82,7 @@ def sam2lca(
 
     reads_taxid_dict = compute_lca(read_dict, process, nb_steps, taxo_db=TAXDB)
     taxid_counts = utils.count_reads_taxid(reads_taxid_dict)
-    utils.taxid_to_lineage(
+    taxid_info_dict = utils.taxid_to_lineage(
         taxid_counts,
         output["sam2lca"],
         process=process,
@@ -93,10 +93,13 @@ def sam2lca(
         write_bam_tags(
             infile=sam,
             outfile=output["bam"],
+            total_reads=al.total_reads,
             read_taxid_dict=reads_taxid_dict,
+            taxid_info_dict=taxid_info_dict,
             identity=identity,
             minlength=length,
         )
+    return taxid_info_dict
 
 
 def update_database(
@@ -113,7 +116,7 @@ def update_database(
     Args:
 
         dbdir (str): Path to database storing directory
-        taxonomy(str): Type of Taxonomy database
+        taxonomy(str): Name of Taxonomy database
         names(str): names.dmp file for taxonomy database. None loads the NCBI taxonomy database
         nodes(str): nodes.dmp file for taxonomy database. None loads the NCBI taxonomy database
         merged(str): merged.dmp file for taxonomy database. None loads the NCBI taxonomy database

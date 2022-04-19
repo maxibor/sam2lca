@@ -13,6 +13,7 @@ import logging
 from tqdm import tqdm
 from collections import ChainMap
 from taxopy import Taxon
+from taxopy.exceptions import TaxidError
 
 
 def accession_to_taxid_lookup(accession_list, taxo_db):
@@ -28,11 +29,11 @@ def accession_to_taxid_lookup(accession_list, taxo_db):
     for i in tqdm(accession_list):
         try:
             taxid = int(DB.get(bytes(i, encoding="utf8")))
-            if taxid != 0 :
+            if taxid != 0:
                 acc2tax[i] = Taxon(taxid, taxo_db)
-        except TypeError as e:
+        except (TypeError, TaxidError) as e:
             # logging.error(f"{i} not found in acc2tax DB", e)
-            logging.error(f"{i} not found in acc2tax DB")
+            logging.error(f"{taxid} not found in acc2tax DB")
             continue
     return acc2tax
 
@@ -96,7 +97,9 @@ class Alignment:
         conserved_regions = flag_conserved_regions(refcov, window_size=window_size)
         return {ref: conserved_regions}
 
-    def __get_reads_refs__(self, identity, minlength, check_conserved, process, unclassified_taxid=12908):
+    def __get_reads_refs__(
+        self, identity, minlength, check_conserved, process, unclassified_taxid=12908
+    ):
         """Get reads passing identity threshold for each reference
 
         Args:
@@ -105,9 +108,9 @@ class Alignment:
             check_conserved(bool): Check if read is mapped in conserved region
             process(int): Number of processes
         """
-        total_reads = int(pysam.view("-c", f"-@ {process}", self.al_file).rstrip())
+        self.total_reads = int(pysam.view("-c", f"-@ {process}", self.al_file).rstrip())
         al_file = pysam.AlignmentFile(self.al_file, self.mode, threads=process)
-        for read in tqdm(al_file, unit="reads", total=total_reads):
+        for read in tqdm(al_file, unit="reads", total=self.total_reads):
             if read.has_tag("NM") and not read.is_unmapped:
                 mismatch = read.get_tag("NM")
                 alnLen = read.query_alignment_length
