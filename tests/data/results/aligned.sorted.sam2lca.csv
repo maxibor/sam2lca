@@ -1,0 +1,15 @@
+TAXID,name,rank,count_taxon,count_descendant,lineage
+543,Enterobacteriaceae,family,2152,2875,family: Enterobacteriaceae || order: Enterobacterales || class: Gammaproteobacteria || phylum: Proteobacteria || superkingdom: Bacteria
+91347,Enterobacterales,order,0,2875,order: Enterobacterales || class: Gammaproteobacteria || phylum: Proteobacteria || superkingdom: Bacteria
+1236,Gammaproteobacteria,class,0,2875,class: Gammaproteobacteria || phylum: Proteobacteria || superkingdom: Bacteria
+1224,Proteobacteria,phylum,0,2875,phylum: Proteobacteria || superkingdom: Bacteria
+2,Bacteria,superkingdom,0,2875,superkingdom: Bacteria
+131567,cellular organisms,no rank,0,2875,
+1,root,no rank,0,2875,
+511145,Escherichia coli str. K-12 substr. MG1655,no rank,385,385,strain: Escherichia coli K-12 || species: Escherichia coli || genus: Escherichia || family: Enterobacteriaceae || order: Enterobacterales || class: Gammaproteobacteria || phylum: Proteobacteria || superkingdom: Bacteria
+83333,Escherichia coli K-12,strain,0,385,strain: Escherichia coli K-12 || species: Escherichia coli || genus: Escherichia || family: Enterobacteriaceae || order: Enterobacterales || class: Gammaproteobacteria || phylum: Proteobacteria || superkingdom: Bacteria
+562,Escherichia coli,species,0,385,species: Escherichia coli || genus: Escherichia || family: Enterobacteriaceae || order: Enterobacterales || class: Gammaproteobacteria || phylum: Proteobacteria || superkingdom: Bacteria
+561,Escherichia,genus,0,385,genus: Escherichia || family: Enterobacteriaceae || order: Enterobacterales || class: Gammaproteobacteria || phylum: Proteobacteria || superkingdom: Bacteria
+300267,Shigella dysenteriae Sd197,strain,338,338,strain: Shigella dysenteriae Sd197 || species: Shigella dysenteriae || genus: Shigella || family: Enterobacteriaceae || order: Enterobacterales || class: Gammaproteobacteria || phylum: Proteobacteria || superkingdom: Bacteria
+622,Shigella dysenteriae,species,0,338,species: Shigella dysenteriae || genus: Shigella || family: Enterobacteriaceae || order: Enterobacterales || class: Gammaproteobacteria || phylum: Proteobacteria || superkingdom: Bacteria
+620,Shigella,genus,0,338,genus: Shigella || family: Enterobacteriaceae || order: Enterobacterales || class: Gammaproteobacteria || phylum: Proteobacteria || superkingdom: Bacteria
