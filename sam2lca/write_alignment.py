@@ -1,23 +1,35 @@
 import logging
 from pysam import AlignmentFile
+from tqdm import tqdm
 
 
-def write_bam_tags(infile, outfile, read_taxid_dict, identity, minlength, unclassified_taxid=12908):
+def write_bam_tags(
+    infile,
+    outfile,
+    total_reads,
+    read_taxid_dict,
+    taxid_info_dict,
+    identity,
+    minlength,
+    unclassified_taxid=12908,
+):
     """Write alignment file with taxonomic information tag
 
     Args:
         infile (str): Path to alignment file
         outfile (str): Path to output file
+        total_reads(int): Total number of reads in file
         read_taxid_dict (dict): Dictionary of read with their corresponding LCA taxid
+        taxid_info_dict(dict): Dictionary of taxid with their count and metadata
         identity (float): Minimum identity for alignment
         minlength (int): Minimum length for alignment
     """
-    logging.info(f"* BAM file, with XT tags set to LCA TAXID, to {outfile}")
+    logging.info(f"* Writing BAM file with taxonomic information tag to {outfile}")
     mode = {"sam": "r", "bam": "rb", "cram": "rc"}
     filetype = infile.split(".")[-1]
     with AlignmentFile(infile, mode[filetype]) as samfile:
         with AlignmentFile(outfile, "wb", template=samfile) as outfile:
-            for read in samfile:
+            for read in tqdm(samfile, unit="reads", total=total_reads):
                 if read.has_tag("NM") and not read.is_unmapped:
                     mismatch = read.get_tag("NM")
                     alnLen = read.query_alignment_length
@@ -25,13 +37,39 @@ def write_bam_tags(infile, outfile, read_taxid_dict, identity, minlength, unclas
                     ident = (alnLen - mismatch) / readLen
                     if ident >= identity and alnLen >= minlength:
                         try:
-                            read.set_tag("XT", read_taxid_dict[read.query_name], "i")
+                            taxid = read_taxid_dict[read.query_name]
+                            read.set_tag("XT", taxid, "i")
+                            read.set_tag(
+                                "XN",
+                                taxid_info_dict[taxid]["name"],
+                                "Z",
+                            )
+                            read.set_tag(
+                                "XR",
+                                taxid_info_dict[taxid]["rank"],
+                                "Z",
+                            )
                         except KeyError:
                             read.set_tag("XT", unclassified_taxid, "i")
+                            read.set_tag(
+                                "XN",
+                                "unclassified sequences",
+                                "Z",
+                            )
                     else:
                         read.set_tag("XT", unclassified_taxid, "i")
+                        read.set_tag(
+                            "XN",
+                            "unclassified sequences",
+                            "Z",
+                        )
                 else:
                     read.set_tag("XT", unclassified_taxid, "i")
+                    read.set_tag(
+                        "XN",
+                        "unclassified sequences",
+                        "Z",
+                    )
                 outfile.write(read)
         outfile.close()
     samfile.close()
