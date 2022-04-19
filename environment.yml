@@ -11,6 +11,7 @@ dependencies:
   - pandoc=2.11.4
   - pip=21.0.1
   - pysam=0.16.0.1
+  - pytest-console-scripts=1.3.1
   - python
   - python-rocksdb=0.7.0
   - recommonmark=0.7.1

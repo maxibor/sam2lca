@@ -25,20 +25,6 @@ jobs:
       - name: Test with pytest
         shell: bash -l {0}
         run: |
-          pip install -e .
-          pip install pytest
-          # pytest
-      - name: Check sam2lca help message
-        shell: bash -l {0}
-        run: |
-          sam2lca --help
-      - name: Check sam2lca on test data
-        shell: bash -l {0}
-        run: |
-          sam2lca update-db --taxonomy custom \
-            --taxo_nodes tests/data/taxonomy/nodes.dmp \
-            --taxo_names  tests/data/taxonomy/names.dmp \
-            --taxo_merged tests/data/taxonomy/merged.dmp \
-            --acc2tax test
-          sam2lca list-db
-          sam2lca analyze -a test -t custom tests/data/aligned.sorted.bam
+          pip install .
+          pip install pytest pytest-console-scripts
+          pytest -s -vv --script-launch-mode=subprocess
