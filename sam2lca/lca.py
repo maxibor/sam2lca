@@ -11,7 +11,7 @@ def taxids_to_lca(read_dict_item, taxo_db, unclassified_taxid=12908):
     """Run LCA on list of TAXID
 
     Args:
-        taxids (frozenset): frozenset of taxids
+        taxids (set): frozenset of taxids
     """
     read, taxids = read_dict_item
     try:
