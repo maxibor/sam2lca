@@ -1,3 +1,5 @@
+![](docs/img/sam2lca_logo_text.png)
+
 ![sam2lca-CI](https://github.com/maxibor/sam2lca/workflows/sam2lca-CI/badge.svg) [![Documentation Status](https://readthedocs.org/projects/sam2lca/badge/?version=latest)](https://sam2lca.readthedocs.io/en/latest/?badge=latest)
 
 # sam2lca
