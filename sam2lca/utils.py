@@ -55,6 +55,7 @@ def check_extension(filename):
     except KeyError:
         raise Exception(f"{extension} file extension not supported")
 
+
 def reassign_count_lineage(taxid_items, read_taxid_dict_reassign, taxo_db):
     """Compute total counts of reads matching to taxons and their descendants
 
@@ -67,7 +68,7 @@ def reassign_count_lineage(taxid_items, read_taxid_dict_reassign, taxo_db):
         lineage = taxon.taxid_lineage
     except Exception:
         read_taxid_dict_reassign[taxid] = [read_count, read_count]
-
+        return
     if taxid not in read_taxid_dict_reassign:
         read_taxid_dict_reassign[taxid] = [read_count, 0]
     else:
@@ -79,7 +80,7 @@ def reassign_count_lineage(taxid_items, read_taxid_dict_reassign, taxo_db):
             read_taxid_dict_reassign[t][1] += read_count
 
 
-def taxid_to_lineage_single(taxid_items, taxo_db):
+def taxid_to_lineage_single(taxid_items, taxid_info_dict, taxo_db):
     """Retrieve Taxonomic lineage and species name from NCBI TAXID
 
     Args:
@@ -95,63 +96,65 @@ def taxid_to_lineage_single(taxid_items, taxo_db):
         rank = taxon.rank
         lineage = taxon.rank_name_dictionary
     except Exception:
-        sciname = "NA"
+        sciname = "unclassified sequences"
         rank = "NA"
         lineage = "NA"
 
-    return {
-        taxid: {
-            "taxon" = taxon
-            "name": sciname,
-            "rank": rank,
-            "count_taxon": read_count_taxon,
-            "count_descendant": read_count_descendant,
-            "lineage": lineage,
-        }
+    taxid_info_dict[taxid] = {
+        "name": sciname,
+        "rank": rank,
+        "count_taxon": read_count_taxon,
+        "count_descendant": read_count_descendant,
+        "lineage": lineage,
     }
 
-
-
- 
 
 def taxid_to_lineage(taxid_count_dict, output, process, nb_steps, taxo_db):
     logging.info(
         f"Step {6 if nb_steps == 7 else 7 }/{nb_steps}: Converting TAXIDs to taxonomic lineages"
     )
-    
+
     read_taxid_dict_reassign = dict()
     reassign_count_lineage_partial = partial(
-        reassign_count_lineage, 
-        read_taxid_dict_reassign = read_taxid_dict_reassign, 
-        taxo_db=taxo_db)    
+        reassign_count_lineage,
+        read_taxid_dict_reassign=read_taxid_dict_reassign,
+        taxo_db=taxo_db,
+    )
     thread_map(
-        reassign_count_lineage_partial, 
-        taxid_count_dict.items(), 
+        reassign_count_lineage_partial,
+        taxid_count_dict.items(),
         chunksize=1,
-        max_workers=process)
-
-    taxid_to_lineage_single_partial = partial(taxid_to_lineage_single, taxo_db=taxo_db)
+        max_workers=process,
+    )
+    taxid_info_dict = dict()
+    taxid_to_lineage_single_partial = partial(
+        taxid_to_lineage_single, taxid_info_dict=taxid_info_dict, taxo_db=taxo_db
+    )
     res = thread_map(
         taxid_to_lineage_single_partial,
         read_taxid_dict_reassign.items(),
         chunksize=1,
         max_workers=process,
     )
-    res = dict(ChainMap(*res))
 
-    df = pd.DataFrame(res).transpose().sort_values("count", ascending=False)
+    df = pd.DataFrame(taxid_info_dict).transpose()
     df["lineage"] = (
-        df["lineage"].astype(str).str.replace("[\[\]\{\}]", "").str.replace(", ", " - ")
+        df["lineage"]
+        .astype(str)
+        .str.replace("[\[\]\{\}]", "")
+        .str.replace(", ", " || ")
+        .str.replace("'", "")
     )
+    df.sort_values("count_descendant", inplace=True, ascending=False)
     df.to_csv(f"{output}.csv", index_label="TAXID")
 
     with open(f"{output}.json", "w") as write_file:
-        json.dump(res, write_file)
+        json.dump(taxid_info_dict, write_file)
     logging.info(
         f"Step {7 if nb_steps == 7 else 8 }/{nb_steps}: writing sam2lca results:\n* JSON to {output}.json\n* CSV to {output}.csv"
     )
 
-    return res
+    return taxid_info_dict
 
 
 def get_db_connection(db_path):
