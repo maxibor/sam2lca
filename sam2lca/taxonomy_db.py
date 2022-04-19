@@ -8,12 +8,12 @@ from sys import exit as sys_exit
 from pathlib import Path
 
 
-def setup_taxopy_db(dbdir, db_type="NCBI", nodes=None, names=None, merged=None):
+def setup_taxopy_db(dbdir, db_type="ncbi", nodes=None, names=None, merged=None):
     """Setup taxopy database
 
     Args:
         dbdir (str): Path to sam2lca database directory
-        db_type(str): Type of taxonomy database, NCBI, GTDB, or custom
+        db_type(str): Type of taxonomy database, ncbi, or custom
         nodes (str, optional): Path to nodes.dmp . Defaults to None.
         name (str, optional): Path to names.dmp. Defaults to None.
         merged (str, optional): Path to merged.dmp . Defaults to None.
@@ -33,13 +33,13 @@ def setup_taxopy_db(dbdir, db_type="NCBI", nodes=None, names=None, merged=None):
             Path(f"{dbdir}/{file}").unlink()
         except FileNotFoundError:
             continue
-    if db_type == "custom" and not nodes and not names and not merged:
+    if db_type.lower() != "ncbi" and not nodes and not names and not merged:
         logging_error(
             "Custom taxonomy database cannot be created without specifying nodes.dmp, names.dmp, and merged.dmp files"
         )
         sys_exit(1)
     try:
-        kf = True if db_type == "custom" else False
+        kf = True if db_type.lower() != "ncbi" else False
         TAXDB = TaxDb(
             taxdb_dir=dbdir,
             keep_files=kf,
@@ -56,7 +56,7 @@ def setup_taxopy_db(dbdir, db_type="NCBI", nodes=None, names=None, merged=None):
         sys_exit(1)
 
 
-def load_taxonomy_db(dbdir, db_type="NCBI"):
+def load_taxonomy_db(dbdir, db_type="ncbi"):
     """Load taxonomy database
 
     Args:
@@ -66,6 +66,7 @@ def load_taxonomy_db(dbdir, db_type="NCBI"):
     Returns:
         taxopy.TaxDb: Taxonomy database
     """
+    db_type = db_type.lower()
     if os_isfile(f"{dbdir}/{db_type}.pkl"):
         with open(f"{dbdir}/{db_type}.pkl", "rb") as f:
             TAXDB = pickle.load(f)
