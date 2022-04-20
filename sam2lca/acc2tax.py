@@ -62,7 +62,7 @@ def get_mapping(map_config, maptype, dbdir):
 
     Args:
         map_config (dict): Mapping config
-        maptype(str): Mapping type: nucl or prot
+        maptype(str): Mapping type
         dbdir(str): Directory to store taxonomy databases
     """
     mapfiles = map_config["mapfiles"]

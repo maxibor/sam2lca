@@ -126,10 +126,11 @@ def update_database(
 
     if acc2tax_json is None and acc2tax is not None:
         map_config = acc2tax_default
-    elif acc2tax == "json":
-        map_config, acc2tax = get_map_config(map_config_file=map_config)
+    else:
+        map_config, acc2tax = get_map_config(map_config_file=acc2tax_json)
     if acc2tax is not None:
         logging.info(f"* Downloading/updating acc2tax {acc2tax} database ")
+
         get_mapping(map_config=map_config, maptype=acc2tax, dbdir=dbdir)
 
     if taxonomy:
