@@ -1,7 +1,7 @@
 import os
-from sam2lca.acc2tax import base_map_config
-from sam2lca.acc2tax_rocksdb import get_mapping
-from sam2lca.rocksdb_config import OPTS_read
+from sam2lca.data import acc2tax_default
+from sam2lca.acc2tax import get_mapping
+from sam2lca.rocksdb import OPTS_read
 import rocksdb
 from shutil import rmtree
 import pytest
@@ -14,12 +14,12 @@ maptype = "test"
 
 
 def test_create_db():
-    get_mapping(map_config=base_map_config, maptype=maptype, dbdir=db_dir)
+    get_mapping(map_config=acc2tax_default, maptype=maptype, dbdir=db_dir)
 
 
 def test_acc2tax_db_query():
     db = rocksdb.DB(
-        os.path.join(db_dir, base_map_config["map_db"][maptype]),
+        os.path.join(db_dir, acc2tax_default["map_db"][maptype]),
         OPTS_read,
         read_only=True,
     )
