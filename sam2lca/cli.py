@@ -7,6 +7,34 @@ from sam2lca.data import acc2tax_default
 from pathlib import Path
 
 
+from click import option, Option, UsageError
+
+
+class MutuallyExclusiveOption(Option):
+    # Credits goes to Stan Chang for this code snippet
+    # https://gist.github.com/stanchan/bce1c2d030c76fe9223b5ff6ad0f03db
+
+    def __init__(self, *args, **kwargs):
+        self.mutually_exclusive = set(kwargs.pop("mutually_exclusive", []))
+        help = kwargs.get("help", "")
+        if self.mutually_exclusive:
+            ex_str = ", ".join(self.mutually_exclusive)
+            kwargs["help"] = help + (
+                " NOTE: This argument is mutually exclusive with "
+                " arguments: [" + ex_str + "]."
+            )
+        super(MutuallyExclusiveOption, self).__init__(*args, **kwargs)
+
+    def handle_parse_result(self, ctx, opts, args):
+        if self.mutually_exclusive.intersection(opts) and self.name in opts:
+            raise UsageError(
+                "Illegal usage: `{}` is mutually exclusive with "
+                "arguments `{}`.".format(self.name, ", ".join(self.mutually_exclusive))
+            )
+
+        return super(MutuallyExclusiveOption, self).handle_parse_result(ctx, opts, args)
+
+
 @click.group()
 @click.version_option(__version__)
 @click.pass_context
@@ -101,59 +129,63 @@ def analyze(ctx, no_args_is_help=True, **kwargs):
     sam2lca(**kwargs, **ctx.obj)
 
 
-@cli.command()
+@cli.command(help="Download/prepare acc2tax and taxonomy databases")
 @click.pass_context
 @click.option(
+    "-t",
     "--taxonomy",
     type=str,
     default="ncbi",
     show_default=True,
-    help="Name of taxonomy database to create",
+    help="Name of taxonomy database to create (ncbi | gtdb)",
 )
 @click.option(
     "--taxo_names",
     type=click.Path(readable=True, dir_okay=False, file_okay=True),
     default=None,
-    help="names.dmp file for Taxonomy database (optional). Only needed for custom taxonomy database (non ncbi)",
+    help="names.dmp file for Taxonomy database (optional). Only needed for custom taxonomy database (non ncbi or gtdb)",
 )
 @click.option(
     "--taxo_nodes",
     type=click.Path(readable=True, dir_okay=False, file_okay=True),
     default=None,
-    help="nodes.dmp file for Taxonomy database (optional). Only needed for custom taxonomy database (non ncbi)",
+    help="nodes.dmp file for Taxonomy database (optional). Only needed for custom taxonomy database (non ncbi or gtdb)",
 )
 @click.option(
     "--taxo_merged",
     type=click.Path(readable=True, dir_okay=False, file_okay=True),
     default=None,
-    help="merged.dmp file for Taxonomy database (optional). Only needed for custom taxonomy database (non ncbi)",
+    help="merged.dmp file for Taxonomy database (optional). Only needed for custom taxonomy database (non ncbi or gtdb)",
 )
-@click.option(
+@option(
+    "-a",
     "--acc2tax",
+    cls=MutuallyExclusiveOption,
     type=click.Choice(
-        list(acc2tax_default["mapfiles"].keys()) + ["json"],
+        list(acc2tax_default["mapfiles"].keys()),
         case_sensitive=False,
     ),
     default=None,
     show_default=True,
-    help="Type of acc2tax mapping database to build. Choose json to build custom acc2tax database from JSON file",
+    help="Type of acc2tax mapping database to build.",
+    mutually_exclusive=["acc2tax_json"],
 )
-@click.option(
+@option(
     "--acc2tax_json",
+    cls=MutuallyExclusiveOption,
     type=click.Path(writable=True, dir_okay=False, file_okay=True),
     default=None,
     show_default=True,
     help="(Optional) JSON file for specifying extra acc2tax mappings",
+    mutually_exclusive=["acc2tax"],
 )
 def update_db(ctx, no_args_is_help=True, **kwargs):
-    """Download/prepare acc2tax and taxonomy databases"""
     update_database(**ctx.obj, **kwargs)
 
 
-@cli.command()
+@cli.command(help="List available taxonomy and acc2tax databases")
 @click.pass_context
 def list_db(ctx, no_args_is_help=True):
-    """List available taxonomy and acc2tax databases"""
     list_available_db(**ctx.obj, verbose=True)
 
 
