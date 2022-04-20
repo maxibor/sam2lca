@@ -11,11 +11,21 @@ For each of these databases, sam2lca offers different possibilities.
 
 ## `ncbi`
 
-If you're not sure what to use, stick with `ncbi`
+If you're not sure what to use, stick with the default (`ncbi`)
 
 ## `gtdb`
 
-Not yet natively implemented, but see the `custom` taxonomy database below and have a look at [gtdb_to_taxdump](https://github.com/nick-youngblut/gtdb_to_taxdump)
+If you have bacteria and/or archea DNA sequencing data, you can altenatively choose to use the GTDB taxonomy, which is more phylogenetically consistent than the NCBI database. (see the GTDB article here: [10.1093/nar/gkab776](https://doi.org/10.1093/nar/gkab776)).
+
+To use the `GTDB` database with sam2lca, use:
+
+```bash
+--taxonomy gtdb --acc2tax gtdb_r207
+```
+
+This will work if you align your sequencing data against the [`gtdb_genomes_reps`](https://data.gtdb.ecogenomic.org/releases/release207/207.0/genomic_files_reps/gtdb_genomes_reps_r207.tar.gz) genomes.
+
+As of 20/04/2022, only the latest GTDB release (r207) is available. For other (past or future) releases, please have a look at [gtdb_to_taxdump](https://github.com/nick-youngblut/gtdb_to_taxdump) and see **custom** section below, or open an issue on the sam2lca github repository.
 
 ## `custom`
 
@@ -24,6 +34,14 @@ You can provide your own taxonomy database by providing the following files
 - `names.dmp`
 - `nodes.dmp`
 - `merged.dmp`
+
+For example:
+
+```
+sam2lca update-db --taxonomy my_custom_db_name --taxo_names names.dmp --taxo_nodes node.dmp --taxo_merged merged.dmp 
+```
+
+> Make sure than the taxonomic IDs are matching the accession2taxid that you're using !
 
 ## acc2tax - *accession to TAXID* databases
 
@@ -66,6 +84,8 @@ You can provide your own taxonomy database by providing the following files
     >rbcL_0_Grabowskia_glauca
     ```
 
+    - *18s SILVA*: 18S SSU markers extracted from the SILVA database. The fasta file is available directly from SILVA [arb-silva.de/fileadmin/silva_databases/release_138_1/Exports/SILVA_138.1_SSURef_NR99_tax_silva.fasta.gz](https://www.arb-silva.de/fileadmin/silva_databases/release_138_1/Exports/SILVA_138.1_SSURef_NR99_tax_silva.fasta.gz)
+
 ### Protein databases
 
 - `prot` for protein sequences, made of:
@@ -85,7 +105,7 @@ To do so, sam2lca can accept a [`JSON`](https://www.json.org/json-en.html) file,
 For example:
 
 ```bash
-sam2lca update-db --acc2tax custom --acc2tax_json acc2tax.json
+sam2lca update-db --acc2tax_json acc2tax.json
 ```
 
 This JSON file should be formatted as below:

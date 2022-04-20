@@ -17,6 +17,7 @@ dependencies:
   - recommonmark=0.7.1
   - rocksdb=6.13.3
   - setuptools=49.6.0
+  - scipy=1.8.0
   - sphinx=3.4.3
   - sphinx-click=2.5.0
   - sphinxcontrib-applehelp=1.0.2
@@ -30,3 +31,4 @@ dependencies:
   - tqdm=4.56.0
   - xopen=1.1
   - taxopy=0.9.2
+  - Jinja2<3.1

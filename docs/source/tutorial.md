@@ -92,7 +92,7 @@ Once we have our alignment file, here in `bam` format, we can now run [sam2lca](
 First, we need to set up the sam2lca acc2tax database for *plant markers*, with NCBI taxonomic identifiers
 
 ```bash
-sam2lca update-db --taxonomy ncbi --acc2tax plant_markers
+sam2lca update-db --taxonomy ncbi --acc2tax g
 ```
 
 Let's check which sam2lca databases are now available:

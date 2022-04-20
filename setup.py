@@ -38,7 +38,7 @@ setup(
         "scipy",
         "numpy",
     ],
-    packages=find_packages(include=["sam2lca"]),
+    packages=find_packages(exclude=["tests", "docs", "conda"]),
     entry_points={"console_scripts": ["sam2lca = sam2lca.cli:cli"]},
     include_package_data=True,
     package_data={

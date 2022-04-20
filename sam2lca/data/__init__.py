@@ -60,7 +60,7 @@ def get_map_config(
 ):
     """Reads map_config.json file
     Args:
-        map_config_file (str): Path to map_config.json file
+        map_config_file (str): Path to acc2tax.json file
         base_config (dict): Default map_config
     Returns:
         dict: map_config

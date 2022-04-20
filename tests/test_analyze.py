@@ -54,7 +54,7 @@ def test_analyze_cli(script_runner):
         "--acc2tax",
         "test",
         "--output",
-        "output",
+        output,
         bam,
     )
     assert ret.success
