@@ -7,7 +7,15 @@ import logging
 import warnings
 from collections import Counter, ChainMap
 from tqdm.contrib.concurrent import thread_map
+from tqdm import tqdm
 from functools import partial
+import hashlib
+import urllib.request as urllib
+import shutil
+from subprocess import check_output
+import sys
+import gzip
+
 
 warnings.simplefilter(action="ignore", category=FutureWarning)
 
@@ -159,3 +167,83 @@ def taxid_to_lineage(taxid_count_dict, output, process, nb_steps, taxo_db):
 
 def get_db_connection(db_path):
     return rocksdb.DB(db_path, opts=rocksdb.Options(), read_only=True)
+
+
+class TqdmUpTo(tqdm):
+    """Provides `update_to(n)` which uses `tqdm.update(delta_n)`."""
+
+    def update_to(self, b=1, bsize=1, tsize=None):
+        """
+        b  : int, optional
+            Number of blocks transferred so far [default: 1].
+        bsize  : int, optional
+            Size of each block (in tqdm units) [default: 1].
+        tsize  : int, optional
+            Total size (in tqdm units). If [default: None] remains unchanged.
+        """
+        if tsize is not None:
+            self.total = tsize
+        self.update(b * bsize - self.n)  # will also set self.n = b * bsize
+
+
+def wc(filename, compressed=True):
+    if compressed:
+        cmd = f"zcat < {filename} | wc -l"
+    else:
+        cmd = f"wc -l {filename}"
+    return int(check_output(cmd, shell=True).split()[0])
+
+
+def md5(fname):
+    hash_md5 = hashlib.md5()
+    with open(fname, "rb") as f:
+        for chunk in iter(lambda: f.read(4096), b""):
+            hash_md5.update(chunk)
+    return hash_md5.hexdigest()
+
+
+def download_and_checksum(file_url, md5_url, dbdir):
+    """Download  file
+
+    Args:
+        file_url (str): URL of  file
+        md5_url (str): URL of md5  file
+        dbdir (str): path to  local directory
+    Returns:
+        fname (str):  filename
+    """
+
+    md5_fname = os.path.basename(md5_url)
+    fname = os.path.basename(file_url)
+    if file_url.startswith("http") or file_url.startswith("ftp"):
+        urllib.urlretrieve(md5_url, f"{os.path.join(dbdir,md5_fname)}")
+
+        with TqdmUpTo(unit="B", unit_scale=True, miniters=1, desc=fname) as t:
+            urllib.urlretrieve(
+                file_url,
+                filename=f"{os.path.join(dbdir, fname)}",
+                reporthook=t.update_to,
+                data=None,
+            )
+    else:
+        shutil.copy(file_url, f"{os.path.join(dbdir, fname)}")
+        shutil.copy(md5_url, f"{os.path.join(dbdir,md5_fname)}")
+    with open(f"{os.path.join(dbdir,md5_fname)}", "r") as hf:
+        for line in hf:
+            md5_hash = line.rstrip().split()[0]
+    file_hash = md5(f"{os.path.join(dbdir, fname)}")
+    try:
+        assert file_hash == md5_hash
+    except AssertionError:
+        logging.error(f"Error while downloading {file_url}, please try again")
+        sys.exit(1)
+    return fname
+
+
+def decompress(filepath):
+    basename = os.path.basename(filepath).replace(".gz", "")
+    decomp_filepath = os.path.join(os.path.dirname(filepath), basename)
+    with gzip.open(filepath, "rb") as f_in:
+        with open(decomp_filepath, "wb") as f_out:
+            shutil.copyfileobj(f_in, f_out)
+    return decomp_filepath
