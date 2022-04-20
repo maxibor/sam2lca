@@ -69,7 +69,7 @@ def get_map_config(
 
     with open(map_config_file, "r") as f:
         config = json.load(f)
-    acc2tax_name = config["names"].keys()
+    acc2tax_name = list(config["mapfiles"].keys())[0]
     for k in base_config:
         base_config[k].update(config[k])
 
