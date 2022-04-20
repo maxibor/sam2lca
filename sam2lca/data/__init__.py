@@ -20,9 +20,7 @@ acc2tax_default = {
         "gtdb_r207": [
             "https://raw.githubusercontent.com/maxibor/sam2lca/master/sam2lca/data/gtdb_r207.accession2taxid.gz"
         ],
-        "test": [
-            pkg_resources.resource_filename(__name__, "data/test.accession2taxid.gz")
-        ],
+        "test": [pkg_resources.resource_filename(__name__, "test.accession2taxid.gz")],
     },
     "mapmd5": {
         "nucl": [
@@ -43,9 +41,7 @@ acc2tax_default = {
             "https://raw.githubusercontent.com/maxibor/sam2lca/master/sam2lca/data/gtdb_r207.accession2taxid.gz.md5"
         ],
         "test": [
-            pkg_resources.resource_filename(
-                __name__, "data/test.accession2taxid.gz.md5"
-            )
+            pkg_resources.resource_filename(__name__, "test.accession2taxid.gz.md5")
         ],
     },
     "map_db": {

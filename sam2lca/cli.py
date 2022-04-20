@@ -3,7 +3,7 @@
 import click
 from sam2lca import __version__
 from sam2lca.main import sam2lca, update_database, list_available_db
-from sam2lca.acc2tax import base_map_config
+from sam2lca.data import acc2tax_default
 from pathlib import Path
 
 
@@ -131,7 +131,7 @@ def analyze(ctx, no_args_is_help=True, **kwargs):
 @click.option(
     "--acc2tax",
     type=click.Choice(
-        list(base_map_config["mapfiles"].keys()) + ["json"],
+        list(acc2tax_default["mapfiles"].keys()) + ["json"],
         case_sensitive=False,
     ),
     default=None,

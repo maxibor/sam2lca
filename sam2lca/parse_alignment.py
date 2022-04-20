@@ -7,7 +7,7 @@ from sam2lca.check_conserved_regions import (
     is_in_conserved,
 )
 import rocksdb
-from sam2lca.rocksdb_config import OPTS_read
+from sam2lca.rocksdb import OPTS_read
 from tqdm.contrib.concurrent import process_map
 import logging
 from tqdm import tqdm
