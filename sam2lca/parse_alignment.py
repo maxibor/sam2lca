@@ -100,7 +100,7 @@ class Alignment:
     def __get_reads_refs__(
         self, identity, edit_distance, minlength, check_conserved, process, unclassified_taxid=12908
     ):
-        """Get reads passing identity threshold for each reference
+        """Get reads passing identity threshold
 
         Args:
             identity (float): identity threshold
@@ -150,12 +150,13 @@ class Alignment:
                             ).add(unclassified_taxid)
         al_file.close()
 
-    def get_reads(self, process=2, identity=0.9, minlength=30, check_conserved=False):
+    def get_reads(self, process=2, identity=0.9, edit_distance=None, minlength=30, check_conserved=False):
         """Get reads passing identity threshold
         Args:
             dbname(str): Path of RocksDB acc2tax database
             process (int, optional): Number of processes. Defaults to 2.
             identity (float, optional): Identity thresold. Defaults to 0.9.
+            edit_distance (int): edit distance threshold
             minlength(int, optional): Length threshold. Default to 30
             check_conserved(bool, optional): Check conserved regions
         Returns:
@@ -167,16 +168,11 @@ class Alignment:
         if check_conserved:
             logging.info(f"Step 4/{self.nb_steps}: Getting conserved regions")
 
-        if process == 1:
-            self.cons_dict = dict()
-            for ref in tqdm(self.refs):
-                if check_conserved:
+            if process == 1:
+                self.cons_dict = dict()
+                for ref in tqdm(self.refs):
                     self.cons_dict.update(ref, self.get_conserved_regions(ref))
-
-                self.__get_reads_single__(ref, identity, minlength, check_conserved)
-
-        else:
-            if check_conserved:
+            else:
                 cons_res = process_map(
                     self.get_conserved_regions,
                     self.refs,
@@ -185,15 +181,16 @@ class Alignment:
                 )
                 self.cons_dict = dict(ChainMap(*cons_res))
 
-            logging.info(
-                f"Step {4 if self.nb_steps == 7 else 5 }/{self.nb_steps}: Parsing reads in alignment file"
-            )
+        logging.info(
+            f"Step {4 if self.nb_steps == 7 else 5 }/{self.nb_steps}: Parsing reads in alignment file"
+        )
 
-            self.__get_reads_refs__(
-                identity=identity,
-                minlength=minlength,
-                check_conserved=check_conserved,
-                process=process,
-            )
+        self.__get_reads_refs__(
+            identity=identity,
+            edit_distance=edit_distance,
+            minlength=minlength,
+            check_conserved=check_conserved,
+            process=process,
+        )
 
         return self.read_ref_dict

@@ -28,7 +28,7 @@ def test_build_taxonomy_acc2tax_db(script_runner):
         "sam2lca",
         "--dbdir",
         db_dir,
-        "" "update-db",
+        "update-db",
         "--taxonomy",
         "test",
         "--taxo_nodes",

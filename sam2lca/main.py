@@ -20,7 +20,7 @@ def sam2lca(
     acc2tax="nucl",
     process=2,
     identity=0.8,
-    edit_distance=None,
+    distance=None,
     length=30,
     conserved=False,
     bam_out=False,
@@ -78,7 +78,7 @@ def sam2lca(
     read_dict = al.get_reads(
         process=process,
         identity=identity,
-        edit_distance=edit_distance,
+        edit_distance=distance,
         minlength=length,
         check_conserved=conserved,
     )
