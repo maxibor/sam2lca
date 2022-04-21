@@ -14,7 +14,7 @@ build:
     - sam2lca = sam2lca.cli:cli
   noarch: python
   script: {{ PYTHON }} -m pip install . -vv
-  number: 0
+  number: 1
 
 requirements:
   host:
@@ -29,6 +29,7 @@ requirements:
     - tqdm
     - taxopy
     - xopen
+    - scipy
 
 test:
   imports:
