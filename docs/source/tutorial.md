@@ -1,20 +1,20 @@
 # Tutorial
 
-**Using [sam2lca](https://github.com/maxibor/sam2lca) to identify a plant taxon from a `fastq` sequencing files.**
+**Using [sam2lca](https://github.com/maxibor/sam2lca) to identify a plant taxon from `fastq` sequencing files.**
 
-In this tutorial, we'll use the [Angiosperms353](https://academic.oup.com/sysbio/article/68/4/594/5237557) plant markers database, which consists of up to 353 universal Angiosperms (flowering plants) gene markers, derived from the [1000 plant transcriptomes](https://www.nature.com/articles/s41586-019-1693-2) project, to identify a the plant species present in our sequencing data.
+In this tutorial, we'll use the [Angiosperms353](https://academic.oup.com/sysbio/article/68/4/594/5237557) plant markers database to identify a plant species present in our sequencing data. The Angiosperms353 database consists of up to 353 universal Angiosperms (flowering plants) gene markers that are derived from the [1000 plant transcriptomes](https://www.nature.com/articles/s41586-019-1693-2) project.
 
 ## Installing all tools for this tutorial
 
 For this tutorial, a dedicated conda-environment is available to ease the reproducibility.
 
-Download environment
+Download the environment:
 
 ```bash
 wget https://raw.githubusercontent.com/maxibor/sam2lca/master/docs/tutorial/environment.yaml
 ```
 
-Installing and activating environment
+Installing and activating environment:
 
 ```bash
 conda env create -f environment.yaml
@@ -34,19 +34,21 @@ gunzip tutorial_db.fa.gz
 
 ## Indexing the database with Bowtie2
 
-In this tutorial, we're going to work with the [Bowtie2](https://github.com/BenLangmead/bowtie2) read aligner, but other aligners like [BWA](http://bio-bwa.sourceforge.net/) are also just fine.
+In this tutorial, we're going to work with the read aligner [Bowtie2](https://github.com/BenLangmead/bowtie2), but other aligners like [BWA](http://bio-bwa.sourceforge.net/) work also just fine.
 
-Before doing any alignment, we need to index the angiosperms353 database with bowtie2
+Before being able to do any alignment, we need to index the Angiosperms353 database with Bowtie2:
 
 ```bash
 bowtie2-build tutorial_db.fa angiosperms353
 ```
 
-> This step might be a bit long, especially if you have many references present in your database. You may want to speed it up by parallelizing it using the `--threads` option.
-
 ## Preparing `fastq` sequencing files
 
-- Downloading the paired-end DNA sequencing compressed `fastq` files
+> This step might be a bit long, especially if you have many references present in your database. You may want to speed it up by parallelizing it using the `--threads` option.
+
+Prior to aligning the sequencing data, we need to download and process the sequencing data, e.g. to remove adapter sequences. 
+
+Downloading the paired-end DNA sequencing compressed `fastq` files
 
 ```bash
 wget https://raw.githubusercontent.com/maxibor/sam2lca/master/docs/tutorial/data/metagenome.1.fastq.gz
@@ -56,12 +58,14 @@ wget https://raw.githubusercontent.com/maxibor/sam2lca/master/docs/tutorial/data
 - Performing adapter-clipping and quality trimming with [fastp](https://github.com/OpenGene/fastp)
 
 ```bash
-fastp -i metagenome.1.fastq.gz -I metagenome.1.fastq.gz -o metagenome_trimmed.R1.fastq.gz -O metagenome_trimmed.R2.fastq.gz
+fastp -i metagenome.1.fastq.gz -I metagenome.2.fastq.gz -o metagenome_trimmed.R1.fastq.gz -O metagenome_trimmed.R2.fastq.gz
 ```
 
 ## Alignment with Bowtie2
 
-> The important aspect here is to allow multiple alignments reporting for each read, to make sure that all potential hits are reported. This is done by using the `-a` flag of bowtie for reporting alignemnts, or `-k` for reporting up to *N* alignments.
+After having prepared both the Angiosperms353 database and the FastQ sequencing files, we now align the sequencing data against the references using BowTie2.
+
+> The important aspect here is to allow that multiple alignments can be reported for each read to ensure that all potential hits are reported. This is done by using the `-a` flag of Bowtie2 for reporting alignments, or `-k` for reporting up to *N* alignments.
 
 Here, we will allow the reporting of up to 50 alignments per read.
 
@@ -89,10 +93,10 @@ samtools index metagenome.cleaned.sorted.bam
 
 Once we have our alignment file, here in `bam` format, we can now run [sam2lca](https://github.com/maxibor/sam2lca) to identify which plants shed some of its DNA in our sequencing file.
 
-First, we need to set up the sam2lca acc2tax database for *plant markers*, with NCBI taxonomic identifiers
+First, we need to set up the sam2lca acc2tax database for *plant markers*, with NCBI taxonomic identifiers. This step downloads and creates the taxonomy and accession to taxid conversion databases. These databases allow sam2lca to convert the accession ids of the reference genome sequences to their respective taxonomic ids and prepares this information to be accessible within sam2lca.
 
 ```bash
-sam2lca update-db --taxonomy ncbi --acc2tax g
+sam2lca update-db --taxonomy ncbi --acc2tax plant_markers
 ```
 
 Let's check which sam2lca databases are now available:
@@ -101,15 +105,15 @@ Let's check which sam2lca databases are now available:
 sam2lca list-db
 ```
 
-Finally, run sam2lca with the *plant markers* database.
+Finally, we run sam2lca with the *plant markers* database.
 
-> To make sure that we don't accidentally run the LCA algorithm on DNA sequences that are unlikely to belong to the same clade, we will only run the LCA for all references aligned to each read that have a identity greater than 90%. Depending on the type of database, you might want to play with sequence identity threshold.
+> To make sure that we don't accidentally run the LCA algorithm on DNA sequences that are unlikely to belong to the same clade, we will only run the LCA for all references aligned to each read that have a identity greater than 90%. Depending on the type of database, you might want to adjust the sequence identity threshold or try different ones.
 
 ```bash
 sam2lca analyze --acc2tax plant_markers -b -i 0.9 metagenome.cleaned.sorted.bam
 ```
 
-Let's look at the results, for example the file `metagenome.sorted.sam2lca.csv`
+Let's look at the results that are summarized in the file `metagenome.cleaned.sorted.sam2lca.csv`
 
 We see that the only species present in our data, is [*Cannabis sativa*](https://en.wikipedia.org/wiki/Cannabis_sativa), which is indeed what was present in our sample ! (it was a simulated dataset 😉)
 
@@ -175,5 +179,8 @@ oneKP_95 329 5921_Placodiscus_turbinatus 980 255 76M = 980 0 AGATTCAGTCTGATATTGA
 oneKP_144 73 6406_Cannabis_sativa 103 255 76M = 103 0 TCGAATACTGGACGGCTTTTCTTCGAACGAGCTATTGGAGCTTTTAGTATTGCCGAAATGCTGTTTACCTCTAGTC FFFGHHHHJJJJJJJJJJJJJHIJJIJJJJJIJJJJGIJJJJJJJJJJIIJJJJIIJIHFGGGH;DHCAEHFFDFB AS:i:0 XM:i:0 XO:i:0 XG:i:0NM:i:0 MD:Z:76 YT:Z:UP XT:i:3483 XN:Z:Cannabis sativa XR:Z:species
 ```
 
-Note the `XT`, `XN`, and `XR` tags at the end of each line. The value of these tags (the value  after the `:` ) is set by sam2lca to be respectively, the taxonomy IDs, the taxon name, and the taxon rank attributed to each sequencing read by the LCA algorithm.  
+Note the `XT`, `XN`, and `XR` tags at the end of each line. The value of these tags (the value  after the `:` ) is set by sam2lca to be respectively, the taxonomy IDs, the taxon name, and the taxon rank attributed to each sequencing read by the LCA algorithm.
+
+To filter for these tags, we can make use of the filter expressions included in `samtools view`. For example, to obtain all reads assigned to the taxonomic level *class*, we can use `samtools view -e '[XR] == "class"' metagenome.cleaned.sorted.sam2lca.bam` or `samtools view --tag XR:class metagenome.cleaned.sorted.sam2lca.bam`.
+
 Also note that for the first 5 reads (`oneKP_189`, `oneKP_95`, `oneKP_76`, `oneKP_189`), sam2lca classified them as "unclassified sequences" because they didn't pass the sequence identity threshold of 90%. Only the reads `oneKP_144` aligned to `6406_Cannabis_sativa` has an identity high enough to be classified by sam2lca.
