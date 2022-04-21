@@ -1,0 +1,106 @@
+1	|	all	|		|	synonym	|
+1	|	root	|		|	scientific name	|
+2	|	Bacteria	|	Bacteria <bacteria>	|	scientific name	|
+2	|	bacteria	|		|	blast name	|
+2	|	eubacteria	|		|	genbank common name	|
+2	|	Monera	|	Monera <bacteria>	|	in-part	|
+2	|	Procaryotae	|	Procaryotae <bacteria>	|	in-part	|
+2	|	Prokaryotae	|	Prokaryotae <bacteria>	|	in-part	|
+2	|	Prokaryota	|	Prokaryota <bacteria>	|	in-part	|
+2	|	prokaryote	|	prokaryote <bacteria>	|	in-part	|
+2	|	prokaryotes	|	prokaryotes <bacteria>	|	in-part	|
+543	|	Enterobacteraceae (ex Lapage 1979) Lapage 1982	|		|	authority	|
+543	|	Enterobacteraceae	|		|	synonym	|
+543	|	enterobacteria	|		|	blast name	|
+543	|	Enterobacteriaceae (ex Rahn 1937) Ewing et al. 1980	|		|	authority	|
+543	|	Enterobacteriaceae Rahn 1937 (Approved Lists 1980) emend. Adeolu et al. 2016	|		|	authority	|
+543	|	Enterobacteriaceae	|		|	scientific name	|
+543	|	gamma-3 proteobacteria	|	gamma-3 proteobacteria <enterobacteria,Enterobacteriaceae>	|	in-part	|
+561	|	Escherichia Castellani and Chalmers 1919	|		|	authority	|
+561	|	Escherichia	|		|	scientific name	|
+562	|	Achromobacter sp. ATCC 35328	|		|	includes	|
+562	|	ATCC 11775	|	ATCC 11775 <neotype strain>	|	type material	|
+562	|	"Bacillus coli" Migula 1895	|		|	authority	|
+562	|	Bacillus coli	|		|	synonym	|
+562	|	bacterium 10a	|		|	includes	|
+562	|	"Bacterium coli commune" Escherich 1885	|		|	authority	|
+562	|	Bacterium coli commune	|		|	synonym	|
+562	|	"Bacterium coli" (Migula 1895) Lehmann and Neumann 1896	|		|	authority	|
+562	|	Bacterium coli	|		|	synonym	|
+562	|	bacterium E3	|		|	includes	|
+562	|	CCUG 24	|	CCUG 24 <neotype strain>	|	type material	|
+562	|	CCUG 29300	|	CCUG 29300 <neotype strain>	|	type material	|
+562	|	CIP 54.8	|	CIP 54.8 <neotype strain>	|	type material	|
+562	|	DSM 30083	|	DSM 30083 <neotype strain>	|	type material	|
+562	|	E. coli	|		|	common name	|
+562	|	Enterococcus coli	|		|	synonym	|
+562	|	Escherichia coli (Migula 1895) Castellani and Chalmers 1919	|		|	authority	|
+562	|	Escherichia coli	|		|	scientific name	|
+562	|	Escherichia/Shigella coli	|		|	equivalent name	|
+562	|	Escherichia sp. 3_2_53FAA	|		|	includes	|
+562	|	Escherichia sp. MAR	|		|	includes	|
+562	|	IAM 12119	|	IAM 12119 <neotype strain>	|	type material	|
+562	|	JCM 1649	|	JCM 1649 <neotype strain>	|	type material	|
+562	|	LMG 2092	|	LMG 2092 <neotype strain>	|	type material	|
+562	|	LMG:2092	|	LMG:2092 <neotype strain>	|	type material	|
+562	|	NBRC 102203	|	NBRC 102203 <neotype strain>	|	type material	|
+562	|	NCCB 54008	|	NCCB 54008 <neotype strain>	|	type material	|
+562	|	NCTC 9001	|	NCTC 9001 <neotype strain>	|	type material	|
+620	|	Shigella Castellani and Chalmers 1919	|		|	authority	|
+620	|	Shigella	|		|	scientific name	|
+622	|	ATCC 13313	|	ATCC 13313 <type strain>	|	type material	|
+622	|	"Bacillus dysenteriae" Shiga 1898	|		|	authority	|
+622	|	Bacillus dysenteriae	|		|	synonym	|
+622	|	"Bacillus dysentericus" Shiga 1897	|		|	authority	|
+622	|	Bacillus dysentericus	|		|	synonym	|
+622	|	"Bacillus shigae" Chester 1901	|		|	authority	|
+622	|	Bacillus shigae	|		|	synonym	|
+622	|	CIP 57.28	|	CIP 57.28 <type strain>	|	type material	|
+622	|	"Eberthella dysenteriae" (Shiga 1898) Bergey et al. 1925	|		|	authority	|
+622	|	Eberthella dysenteriae	|		|	synonym	|
+622	|	Escherichia/Shigella dysenteriae	|		|	equivalent name	|
+622	|	NCTC 4837	|	NCTC 4837 <type strain>	|	type material	|
+622	|	Shigella dysenteriae	|		|	scientific name	|
+622	|	Shigella dysenteriae (Shiga 1897) Castellani and Chalmers 1919	|		|	authority	|
+622	|	Shigella dysenteriae (Shiga 1898) Castellani and Chalmers 1919	|		|	authority	|
+622	|	"Shigella shigae" (Chester 1901) Wilson and Miles 1946	|		|	authority	|
+622	|	Shigella shigae	|		|	synonym	|
+1224	|	Alphaproteobacteraeota	|		|	synonym	|
+1224	|	Alphaproteobacteriota	|		|	synonym	|
+1224	|	proteobacteria	|		|	blast name	|
+1224	|	Proteobacteria [class] Stackebrandt et al. 1988	|		|	authority	|
+1224	|	Proteobacteria Garrity et al. 2005	|		|	authority	|
+1224	|	Proteobacteria	|		|	scientific name	|
+1224	|	purple bacteria and relatives	|		|	common name	|
+1224	|	purple bacteria	|		|	common name	|
+1224	|	purple non-sulfur bacteria	|		|	common name	|
+1224	|	purple photosynthetic bacteria and relatives	|		|	common name	|
+1224	|	purple photosynthetic bacteria	|		|	common name	|
+1236	|	Gammaproteobacteria Garrity et al. 2005 emend. Williams and Kelly 2013	|		|	authority	|
+1236	|	Gammaproteobacteria	|		|	scientific name	|
+1236	|	gamma proteobacteria	|		|	synonym	|
+1236	|	gamma subdivision	|		|	synonym	|
+1236	|	gamma subgroup	|		|	synonym	|
+1236	|	g-proteobacteria	|		|	blast name	|
+1236	|	Proteobacteria gamma subdivision	|		|	synonym	|
+1236	|	Purple bacteria, gamma subdivision	|		|	synonym	|
+83333	|	Escherichia coli K12	|		|	equivalent name	|
+83333	|	Escherichia coli K-12	|		|	scientific name	|
+91347	|	Enterobacterales Adeolu et al. 2016	|		|	authority	|
+91347	|	Enterobacterales	|		|	scientific name	|
+91347	|	Enterobacteriaceae and related endosymbionts	|		|	synonym	|
+91347	|	Enterobacteriaceae group	|		|	synonym	|
+91347	|	Enterobacteriales	|		|	synonym	|
+91347	|	gamma-3 proteobacteria	|	gamma-3 proteobacteria <enterobacteria,Enterobacterales>	|	in-part	|
+131567	|	biota	|		|	synonym	|
+131567	|	cellular organisms	|		|	scientific name	|
+300267	|	Shigella dysenteriae Sd197	|		|	scientific name	|
+300267	|	Shigella dysenteriae strain Sd197	|		|	equivalent name	|
+300267	|	Shigella dysenteriae str. Sd197	|		|	equivalent name	|
+347014	|	"Averyella" Johnson et al. 2005	|		|	authority	|
+347014	|	Averyella	|		|	scientific name	|
+511145	|	Escherichia coli MG1655	|		|	synonym	|
+511145	|	Escherichia coli strain MG1655	|		|	equivalent name	|
+511145	|	Escherichia coli str. K12 substr. MG1655	|		|	equivalent name	|
+511145	|	Escherichia coli str. K-12 substr. MG1655	|		|	scientific name	|
+511145	|	Escherichia coli str. MG1655	|		|	equivalent name	|
