@@ -77,14 +77,25 @@ def cli(ctx, dbdir):
     show_default=True,
     help="acc2tax database to use",
 )
-@click.option(
+@option(
     "-i",
     "--identity",
-    type=float,
+    cls=MutuallyExclusiveOption,
+    type=click.FloatRange(0, 1),
     default=0.8,
     show_default=True,
-    help="Minimum identity",
+    help="Minimum identity threshold",
+    mutually_exclusive=["distance"],
 )
+@option(
+    "-d",
+    "--distance",
+    cls=MutuallyExclusiveOption,
+    type=int,
+    default=None,
+    help="Edit distance threshold",
+    mutually_exclusive=["identity"],
+)   
 @click.option(
     "-l",
     "--length",
@@ -176,7 +187,7 @@ def analyze(ctx, no_args_is_help=True, **kwargs):
     type=click.Path(writable=True, dir_okay=False, file_okay=True),
     default=None,
     show_default=True,
-    help="(Optional) JSON file for specifying extra acc2tax mappings",
+    help="JSON file for specifying extra acc2tax mappings",
     mutually_exclusive=["acc2tax"],
 )
 def update_db(ctx, no_args_is_help=True, **kwargs):

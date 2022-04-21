@@ -20,6 +20,7 @@ def sam2lca(
     acc2tax="nucl",
     process=2,
     identity=0.8,
+    edit_distance=None,
     length=30,
     conserved=False,
     bam_out=False,
@@ -33,7 +34,8 @@ def sam2lca(
         taxonomy(str): Type of Taxonomy database
         acc2tax(str): Type of acc2tax database
         process (int): Number of process for parallelization
-        identity(float): Minimum identity
+        identity(float): Minimum alignment identity threshold
+        edit_distance(int): Maximum edit distance threshold
         length(int): Minimum alignment length
         bam_out(bool): Write BAM output file with XT tag for TAXID
     """
@@ -76,6 +78,7 @@ def sam2lca(
     read_dict = al.get_reads(
         process=process,
         identity=identity,
+        edit_distance=edit_distance,
         minlength=length,
         check_conserved=conserved,
     )

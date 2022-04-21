@@ -98,12 +98,13 @@ class Alignment:
         return {ref: conserved_regions}
 
     def __get_reads_refs__(
-        self, identity, minlength, check_conserved, process, unclassified_taxid=12908
+        self, identity, edit_distance, minlength, check_conserved, process, unclassified_taxid=12908
     ):
         """Get reads passing identity threshold for each reference
 
         Args:
             identity (float): identity threshold
+            edit_distance (int): edit distance threshold
             minlength(int): Length threshold.
             check_conserved(bool): Check if read is mapped in conserved region
             process(int): Number of processes
@@ -115,8 +116,13 @@ class Alignment:
                 mismatch = read.get_tag("NM")
                 alnLen = read.query_alignment_length
                 readLen = read.query_length
-                ident = (alnLen - mismatch) / readLen
-                if ident >= identity and alnLen >= minlength:
+                if edit_distance:
+                    threshold = edit_distance
+                    align_value = mismatch
+                else:
+                    threshold = 1 - identity
+                    align_value = 1 - ((alnLen - mismatch) / readLen)
+                if align_value <= threshold and alnLen >= minlength:
                     if check_conserved:
                         is_conserved = is_in_conserved(
                             read, self.cons_dict[read.reference_name]
