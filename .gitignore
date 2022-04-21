@@ -109,3 +109,4 @@ mappings
 aligned.sorted.sam2lca.*
 sam2lca_test_dbdir
 sam2lca.egg-info
+.DS_Store
