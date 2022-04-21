@@ -21,7 +21,7 @@ def get_version(rel_path):
 setup(
     name="sam2lca",
     version=get_version("sam2lca/__init__.py"),
-    description="Last Common Ancestor on SAM/BAM/CRAM alignment files",
+    description="Lowest Common Ancestor on SAM/BAM/CRAM alignment files",
     long_description=open("README.md").read(),
     url="https://github.com/maxibor/sam2lca",
     long_description_content_type="text/markdown",

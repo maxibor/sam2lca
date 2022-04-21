@@ -1,42 +1,50 @@
-{% set setup_data = load_setup_py_data() %}
+{% set name = "sam2lca" %}
+{% set version = "1.0.0b0" %}
+
 package:
-  name: sam2lca
-  version: {{ setup_data['version'] }}
+  name: {{ name|lower }}
+  version: {{ version }}
 
 source:
-  git_rev: {{ setup_data['version'] }}
-  git_url: https://github.com/maxibor/sam2lca.git
+  url: https://pypi.io/packages/source/{{ name[0] }}/{{ name }}/sam2lca-{{ version }}.tar.gz
+  sha256: 6d91c363cd0aa5d13c2e3491da4241109ece3948cb038d5a621e8263cf584f60
 
 build:
+  entry_points:
+    - sam2lca = sam2lca.cli:cli
+  noarch: python
+  script: {{ PYTHON }} -m pip install . -vv
   number: 0
-  skip: true  # [win and py27 or win32]
-  script: {{ PYTHON }} -m pip install . --no-deps -vv
 
 requirements:
-  build:
-    - python
-    - setuptools
+  host:
     - pip
+    - python >=3.7
   run:
-    - python
-    - click >=7.0
-    - pip >=20.0.2
-    - bioconda::taxopy=0.9.2
-    - bioconda::pysam >=0.15.2
-    - conda-forge::rocksdb >=6.10.1
-    - conda-forge::python-rocksdb >=0.7.0
-    - conda-forge::xopen >=0.9.0
-    - tqdm >=4.45.0
-    - pandas >=1.1.4
-    
+    - click
+    - pandas
+    - pysam
+    - python >=3.7
+    - python-rocksdb
+    - tqdm
+    - taxopy
+    - xopen
+
 test:
   imports:
     - sam2lca
-
+  commands:
+    - pip check
+    - sam2lca --help
+  requires:
+    - pip
 
 about:
   home: https://github.com/maxibor/sam2lca
+  summary: Last Commont Ancestor on SAM/BAM/CRAM alignment files
   license: GPL-3.0
-  summary: 'Performs LCA on SAM/BAM/CRAM alignment file'
+  license_file: LICENSE
 
-# Build using: conda build -c conda-forge .
+extra:
+  recipe-maintainers:
+    - maxibor
