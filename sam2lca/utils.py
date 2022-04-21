@@ -5,7 +5,7 @@ from taxopy import Taxon
 import pandas as pd
 import logging
 import warnings
-from collections import Counter, ChainMap
+from collections import Counter
 from tqdm.contrib.concurrent import thread_map
 from tqdm import tqdm
 from functools import partial
