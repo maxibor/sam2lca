@@ -181,6 +181,6 @@ oneKP_144 73 6406_Cannabis_sativa 103 255 76M = 103 0 TCGAATACTGGACGGCTTTTCTTCGA
 
 Note the `XT`, `XN`, and `XR` tags at the end of each line. The value of these tags (the value  after the `:` ) is set by sam2lca to be respectively, the taxonomy IDs, the taxon name, and the taxon rank attributed to each sequencing read by the LCA algorithm.
 
-To filter for these tags, we can make use of the filter expressions included in `samtools view`. For example, to obtain all reads assigned to the taxonomic level *class*, we can use `samtools view -e '[XR] == "class"' metagenome.cleaned.sorted.sam2lca.bam`.
+To filter for these tags, we can make use of the filter expressions included in `samtools view`. For example, to obtain all reads assigned to the taxonomic level *class*, we can use `samtools view -e '[XR] == "class"' metagenome.cleaned.sorted.sam2lca.bam` or `samtools view --tag XR:class metagenome.cleaned.sorted.sam2lca.bam`.
 
 Also note that for the first 5 reads (`oneKP_189`, `oneKP_95`, `oneKP_76`, `oneKP_189`), sam2lca classified them as "unclassified sequences" because they didn't pass the sequence identity threshold of 90%. Only the reads `oneKP_144` aligned to `6406_Cannabis_sativa` has an identity high enough to be classified by sam2lca.
