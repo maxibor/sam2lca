@@ -123,7 +123,7 @@ def cli(ctx, dbdir):
     "--output",
     type=click.Path(writable=True, dir_okay=False, file_okay=True),
     default=None,
-    help="sam2lca output file",
+    help="sam2lca output file. Default: [basename].sam2lca.*",
 )
 @click.option(
     "-b",
