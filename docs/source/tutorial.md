@@ -93,7 +93,7 @@ samtools index metagenome.cleaned.sorted.bam
 
 Once we have our alignment file, here in `bam` format, we can now run [sam2lca](https://github.com/maxibor/sam2lca) to identify which plants shed some of its DNA in our sequencing file.
 
-First, we need to set up the sam2lca acc2tax database for *plant markers*, with NCBI taxonomic identifiers. This steps matches the accession ids of the reference genomes with their respective taxonomic ids and prepares this information to be accessible within sam2lca.
+First, we need to set up the sam2lca acc2tax database for *plant markers*, with NCBI taxonomic identifiers. This step downloads and creates the taxonomy and accession to taxid conversion databases. These databases allow sam2lca to convert the accession ids of the reference genome sequences to their respective taxonomic ids and prepares this information to be accessible within sam2lca.
 
 ```bash
 sam2lca update-db --taxonomy ncbi --acc2tax plant_markers
