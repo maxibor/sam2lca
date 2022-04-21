@@ -21,6 +21,7 @@ __ homepage_
    databases
    output
    tutorial
+   contributing
    
 
 

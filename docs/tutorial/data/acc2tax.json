@@ -1,0 +1,19 @@
+{
+    "mapfiles": {
+        "plant_markers_json": [
+            "https://raw.githubusercontent.com/maxibor/sam2lca/master/sam2lca/data/angiosperms353.accession2taxid.gz",
+            "https://raw.githubusercontent.com/maxibor/sam2lca/master/sam2lca/data/ITS.accession2taxid.gz",
+            "https://raw.githubusercontent.com/maxibor/sam2lca/master/sam2lca/data/rbcl.accession2taxid.gz"
+        ]
+    },
+    "mapmd5": {
+        "plant_markers_json": [
+            "https://raw.githubusercontent.com/maxibor/sam2lca/master/sam2lca/data/angiosperms353.accession2taxid.gz.md5",
+            "https://raw.githubusercontent.com/maxibor/sam2lca/master/sam2lca/data/ITS.accession2taxid.gz.md5",
+            "https://raw.githubusercontent.com/maxibor/sam2lca/master/sam2lca/data/rbcl.accession2taxid.gz.md5"
+        ]
+    },
+    "map_db": {
+        "plant_markers_json": "plant_markers_json.db"
+    }
+}
