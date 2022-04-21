@@ -113,7 +113,7 @@ Finally, we run sam2lca with the *plant markers* database.
 sam2lca analyze --acc2tax plant_markers -b -i 0.9 metagenome.cleaned.sorted.bam
 ```
 
-Let's look at the results that are summarized in the file `metagenome.sorted.sam2lca.csv`
+Let's look at the results that are summarized in the file `metagenome.cleaned.sorted.sam2lca.csv`
 
 We see that the only species present in our data, is [*Cannabis sativa*](https://en.wikipedia.org/wiki/Cannabis_sativa), which is indeed what was present in our sample ! (it was a simulated dataset 😉)
 
