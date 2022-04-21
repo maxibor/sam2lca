@@ -24,7 +24,13 @@ conda activate sam2lca
 pip install -e .
 ```
 
-### Build the documentation
+## Run the unit and integration tests
+
+```bash
+pytest -s -vv --script-launch-mode=subprocess
+```
+
+## Build the documentation
 
 ```bash
 cd docs
@@ -32,3 +38,8 @@ make html
 ```
 
 The docs are built in the `docs/build/html` directory
+
+### Claim your sticker
+
+Thanks for contributing to sam2lca !
+If you want to spread the word about sam2lca, please get in touch with me to claim your sticker (maxime_borry[at]eva.mpg.de) !
