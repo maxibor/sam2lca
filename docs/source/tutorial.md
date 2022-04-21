@@ -58,7 +58,7 @@ wget https://raw.githubusercontent.com/maxibor/sam2lca/master/docs/tutorial/data
 - Performing adapter-clipping and quality trimming with [fastp](https://github.com/OpenGene/fastp)
 
 ```bash
-$ fastp -i metagenome.1.fastq.gz -I metagenome.2.fastq.gz -o metagenome_trimmed.R1.fastq.gz -O metagenome_trimmed.R2.fastq.gz
+fastp -i metagenome.1.fastq.gz -I metagenome.2.fastq.gz -o metagenome_trimmed.R1.fastq.gz -O metagenome_trimmed.R2.fastq.gz
 ```
 
 ## Alignment with Bowtie2
