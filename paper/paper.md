@@ -17,9 +17,10 @@ authors:
     orcid: 0000-0001-9140-7559
     affiliation: "1" # (Multiple affiliations must be quoted)
   - name: Alexander Hübner # note this makes a footnote saying 'Co-first author'
-    orcid: 0000-0000-0000-0000
+    orcid: 0000-0003-3572-9996
     affiliation: "1, 2" # (Multiple affiliations must be quoted)
   - name: Christina Warinner
+    orcid: 0000-0002-4528-5877
     affiliation: "1, 2, 3"
 affiliations:
  - name: Microbiome Sciences Group, Max Planck Institute for Evolutionary Anthropology, Department of Archaeogenetics, Leipzig, Germany
