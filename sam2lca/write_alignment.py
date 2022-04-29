@@ -10,6 +10,7 @@ def write_bam_tags(
     read_taxid_dict,
     taxid_info_dict,
     identity,
+    edit_distance,
     minlength,
     unclassified_taxid=12908,
 ):
@@ -22,6 +23,7 @@ def write_bam_tags(
         read_taxid_dict (dict): Dictionary of read with their corresponding LCA taxid
         taxid_info_dict(dict): Dictionary of taxid with their count and metadata
         identity (float): Minimum identity for alignment
+        edit_distance (int): Minimum edit distance for alignment
         minlength (int): Minimum length for alignment
     """
     logging.info(f"* Writing BAM file with taxonomic information tag to {outfile}")
@@ -35,7 +37,13 @@ def write_bam_tags(
                     alnLen = read.query_alignment_length
                     readLen = read.query_length
                     ident = (alnLen - mismatch) / readLen
-                    if ident >= identity and alnLen >= minlength:
+                    if edit_distance:
+                        threshold = edit_distance
+                        align_value = mismatch
+                    else:
+                        threshold = 1 - identity
+                        align_value = 1 - ((alnLen - mismatch) / readLen)
+                    if align_value <= threshold and alnLen >= minlength:
                         try:
                             taxid = read_taxid_dict[read.query_name]
                             read.set_tag("XT", taxid, "i")

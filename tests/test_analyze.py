@@ -71,6 +71,25 @@ def test_analyze_results():
         test_results = json.load(f)
     assert target_results == test_results
 
+def test_analyze_distance_cli(script_runner):
+    bam = os.path.join(data_dir, "aligned.sorted.bam")
+    ret = script_runner.run(
+        "sam2lca",
+        "--dbdir",
+        db_dir,
+        "analyze",
+        "--taxonomy",
+        "test",
+        "--acc2tax",
+        "test",
+        "--distance",
+        "1",
+        "--output",
+        output,
+        bam,
+    )
+    assert ret.success
+
 
 def test_cleanup():
     rmtree(db_dir)

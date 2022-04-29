@@ -100,6 +100,7 @@ def sam2lca(
             read_taxid_dict=reads_taxid_dict,
             taxid_info_dict=taxid_info_dict,
             identity=identity,
+            edit_distance=distance,
             minlength=length,
         )
     return taxid_info_dict
