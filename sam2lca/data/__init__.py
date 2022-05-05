@@ -15,10 +15,11 @@ acc2tax_default = {
             "https://raw.githubusercontent.com/maxibor/sam2lca/master/sam2lca/data/angiosperms353.accession2taxid.gz",
             "https://raw.githubusercontent.com/maxibor/sam2lca/master/sam2lca/data/ITS.accession2taxid.gz",
             "https://raw.githubusercontent.com/maxibor/sam2lca/master/sam2lca/data/rbcl.accession2taxid.gz",
-            "https://raw.githubusercontent.com/maxibor/sam2lca/taxopy/sam2lca/data/SILVA_138.1_SSURef_NR99.accession2taxid.gz",
+            "https://raw.githubusercontent.com/maxibor/sam2lca/master/sam2lca/data/SILVA_138.1_SSURef_NR99.accession2taxid.gz",
+            "https://raw.githubusercontent.com/maxibor/sam2lca/master/sam2lca/data/18s_pr2_4.14.0_SSU_mothur.accession2taxid.gz"
         ],
         "gtdb_r207": [
-            "https://raw.githubusercontent.com/maxibor/sam2lca/taxopy/sam2lca/data/gtdb_r207.accession2taxid.gz"
+            "https://raw.githubusercontent.com/maxibor/sam2lca/master/sam2lca/data/gtdb_r207.accession2taxid.gz"
         ],
         "test": [pkg_resources.resource_filename(__name__, "test.accession2taxid.gz")],
     },
@@ -35,10 +36,11 @@ acc2tax_default = {
             "https://raw.githubusercontent.com/maxibor/sam2lca/master/sam2lca/data/angiosperms353.accession2taxid.gz.md5",
             "https://raw.githubusercontent.com/maxibor/sam2lca/master/sam2lca/data/ITS.accession2taxid.gz.md5",
             "https://raw.githubusercontent.com/maxibor/sam2lca/master/sam2lca/data/rbcl.accession2taxid.gz.md5",
-            "https://raw.githubusercontent.com/maxibor/sam2lca/taxopy/sam2lca/data/SILVA_138.1_SSURef_NR99.accession2taxid.gz.md5",
+            "https://raw.githubusercontent.com/maxibor/sam2lca/master/sam2lca/data/SILVA_138.1_SSURef_NR99.accession2taxid.gz.md5",
+            "https://raw.githubusercontent.com/maxibor/sam2lca/master/sam2lca/data/18s_pr2_4.14.0_SSU_mothur.accession2taxid.gz.md5"
         ],
         "gtdb_r207": [
-            "https://raw.githubusercontent.com/maxibor/sam2lca/taxopy/sam2lca/data/gtdb_r207.accession2taxid.gz.md5"
+            "https://raw.githubusercontent.com/maxibor/sam2lca/master/sam2lca/data/gtdb_r207.accession2taxid.gz.md5"
         ],
         "test": [
             pkg_resources.resource_filename(__name__, "test.accession2taxid.gz.md5")

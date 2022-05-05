@@ -84,7 +84,11 @@ sam2lca update-db --taxonomy my_custom_db_name --taxo_names names.dmp --taxo_nod
     >rbcL_0_Grabowskia_glauca
     ```
 
-    - *18s SILVA*: 18S SSU markers extracted from the SILVA database. The fasta file is available directly from SILVA [arb-silva.de/fileadmin/silva_databases/release_138_1/Exports/SILVA_138.1_SSURef_NR99_tax_silva.fasta.gz](https://www.arb-silva.de/fileadmin/silva_databases/release_138_1/Exports/SILVA_138.1_SSURef_NR99_tax_silva.fasta.gz)
+  - *18s SILVA*: 18S SSU markers extracted from the SILVA database. The fasta file is available directly from SILVA [arb-silva.de/fileadmin/silva_databases/release_138_1/Exports/SILVA_138.1_SSURef_NR99_tax_silva.fasta.gz](https://www.arb-silva.de/fileadmin/silva_databases/release_138_1/Exports/SILVA_138.1_SSURef_NR99_tax_silva.fasta.gz)
+
+  - *18s PR2*: 18s markers from the [PR2 database](https://pr2-database.org/) v4.14. The fasta file is available directly from PR2 [github.com/pr2database/pr2database/releases/download/v4.14.0/pr2_version_4.14.0_SSU_mothur.fasta.gz](https://github.com/pr2database/pr2database/releases/download/v4.14.0/pr2_version_4.14.0_SSU_mothur.fasta.gz)
+
+- `gtdb_r207`: should you use the `GTDB` taxonomy database, you will also need to use the `GTDB` acc2tax database. The fasta files can be downloaded directly from `GTDB` r207: [data.gtdb.ecogenomic.org/releases/release207/207.0/genomic_files_reps/gtdb_genomes_reps_r207.tar.gz](https://data.gtdb.ecogenomic.org/releases/release207/207.0/genomic_files_reps/gtdb_genomes_reps_r207.tar.gz)
 
 ### Protein databases
 
