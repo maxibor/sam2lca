@@ -9,7 +9,7 @@
 
 # sam2lca
 
-[Lowest Common Ancestor](https://en.wikipedia.org/wiki/Lowest_common_ancestor) from a [SAM/BAM/CRAM](<https://en.wikipedia.org/wiki/SAM_(file_format>) sequence alignment file.
+[Lowest Common Ancestor](https://en.wikipedia.org/wiki/Lowest_common_ancestor) from a [SAM/BAM/CRAM](https://en.wikipedia.org/wiki/SAM_(file_format)) sequence alignment file.
 
 ## TLDR
 
@@ -47,11 +47,17 @@ pip install sam2lca
 ### For development purposes, from the dev branch
 
 ```bash
+# clone repository 
 git clone git@github.com:maxibor/sam2lca.git
+# work on the dev branch
 git checkout dev
+# work in the sam2lca conda environment
 conda env create -f environment.yml
 conda activate sam2lca
+# install sam2lca in editable mode
 pip install -e .
+# Run the unit and integration tests
+pytest -s -vv --script-launch-mode=subprocess
 ```
 
 or
