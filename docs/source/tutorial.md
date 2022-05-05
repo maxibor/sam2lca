@@ -6,7 +6,14 @@ In this tutorial, we'll use the [Angiosperms353](https://academic.oup.com/sysbio
 
 ## Installing all tools for this tutorial
 
-For this tutorial, a dedicated conda-environment is available to ease the reproducibility.
+For this tutorial, we'll need other tools in addition to sam2lca:
+
+- [fastp](https://github.com/OpenGene/fastp)
+- [bowtie2](http://bowtie-bio.sourceforge.net/bowtie2/index.shtml)
+- [samtools](https://github.com/samtools/samtools)
+- [bamaligncleaner](https://github.com/maxibor/bamAlignCleaner)
+
+We strongly suggest you to install them using the provided conda-environment to ease the reproducibility:
 
 Download the environment:
 
@@ -46,7 +53,7 @@ bowtie2-build tutorial_db.fa angiosperms353
 
 > This step might be a bit long, especially if you have many references present in your database. You may want to speed it up by parallelizing it using the `--threads` option.
 
-Prior to aligning the sequencing data, we need to download and process the sequencing data, e.g. to remove adapter sequences. 
+Prior to aligning the sequencing data, we need to download and process the sequencing data, e.g. to remove adapter sequences.
 
 Downloading the paired-end DNA sequencing compressed `fastq` files
 
