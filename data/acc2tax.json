@@ -19,7 +19,7 @@
             "https://raw.githubusercontent.com/maxibor/sam2lca/master/data/acc2tax/gtdb_r207.accession2taxid.gz"
         ],
         "test": [
-            "/Users/maxime/Documents/github/sam2lca/data/acc2tax/test.accession2taxid.gz"
+            "https://raw.githubusercontent.com/maxibor/sam2lca/master/data/acc2tax/test.accession2taxid.gz"
         ]
     },
     "mapmd5": {
@@ -42,7 +42,7 @@
             "https://raw.githubusercontent.com/maxibor/sam2lca/master/data/acc2tax/gtdb_r207.accession2taxid.gz.md5"
         ],
         "test": [
-            "/Users/maxime/Documents/github/sam2lca/data/acc2tax/test.accession2taxid.gz.md5"
+            "https://raw.githubusercontent.com/maxibor/sam2lca/master/data/acc2tax/test.accession2taxid.gz.md5"
         ]
     },
     "map_db": {
