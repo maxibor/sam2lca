@@ -57,7 +57,7 @@ def test_taxid_to_lineage(taxo_db):
 
 def test_json():
     test_acc2tax = get_json("https://raw.githubusercontent.com/maxibor/sam2lca/master/data/acc2tax.json")
-    assert test_acc2tax["mapfiles"]["test"] == "https://raw.githubusercontent.com/maxibor/sam2lca/master/data/acc2tax/test.accession2taxid.gz"
+    assert test_acc2tax["mapfiles"]["test"][0] == "https://raw.githubusercontent.com/maxibor/sam2lca/master/data/acc2tax/test.accession2taxid.gz"
 
 def test_cleanup():
     rmtree(db_dir)
