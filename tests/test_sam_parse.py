@@ -21,15 +21,15 @@ def test_build_taxonomy_acc2tax_db(script_runner):
         db_dir,
         "update-db",
         "--taxonomy",
-        "test",
+        f"{maptype}",
         "--acc2tax",
-        "test",
+        f"{maptype}",
     )
     assert ret.success
 
 def test_parse_sam():
 
-    with open(os.path.join(db_dir, "test.pkl"), "rb") as tdb:
+    with open(os.path.join(db_dir, f"{maptype}.pkl"), "rb") as tdb:
         taxo_db = pickle.load(tdb)
 
     sam = os.path.join(data_dir, "aligned.sorted.bam")

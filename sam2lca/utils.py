@@ -216,7 +216,7 @@ def download_and_checksum(file_url, md5_url, dbdir):
     md5_fname = os.path.basename(md5_url)
     fname = os.path.basename(file_url)
     if file_url.startswith("http") or file_url.startswith("ftp"):
-        urllib.urlretrieve(md5_url, f"{os.path.join(dbdir,md5_fname)}")
+        urllib.urlretrieve(md5_url, f"{os.path.join(dbdir, md5_fname)}")
 
         with TqdmUpTo(unit="B", unit_scale=True, miniters=1, desc=fname) as t:
             urllib.urlretrieve(
@@ -227,7 +227,7 @@ def download_and_checksum(file_url, md5_url, dbdir):
             )
     else:
         shutil.copy(file_url, f"{os.path.join(dbdir, fname)}")
-        shutil.copy(md5_url, f"{os.path.join(dbdir,md5_fname)}")
+        shutil.copy(md5_url, f"{os.path.join(dbdir, md5_fname)}")
     with open(f"{os.path.join(dbdir,md5_fname)}", "r") as hf:
         for line in hf:
             md5_hash = line.rstrip().split()[0]

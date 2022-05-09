@@ -69,7 +69,7 @@ def setup_taxopy_db(dbdir, db_type="ncbi", nodes=None, names=None, merged=None):
             continue
 
     if db_type.lower() != "ncbi":
-        taxonomy = get_taxonomy(dbdir, taxo_type=db_type.lower())
+        taxonomy = get_taxonomy(dbdir = dbdir, taxo_type=db_type.lower())
         nodes = taxonomy["nodes"]
         names = taxonomy["names"]
         merged = taxonomy["merged"]
@@ -108,8 +108,8 @@ def load_taxonomy_db(dbdir, db_type="ncbi"):
         taxopy.TaxDb: Taxonomy database
     """
     db_type = db_type.lower()
-    if os_isfile(f"{dbdir}/{db_type}.pkl"):
-        with open(f"{dbdir}/{db_type}.pkl", "rb") as f:
+    if os_isfile(os.path.join(dbdir, f"{db_type}.pkl")):
+        with open(os.path.join(dbdir, f"{db_type}.pkl"), "rb") as f:
             TAXDB = pickle.load(f)
         return TAXDB
     else:

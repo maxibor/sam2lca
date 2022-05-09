@@ -3,12 +3,11 @@ import pickle
 import pytest
 from shutil import rmtree
 from sam2lca.main import update_database
-from sam2lca.utils import taxid_to_lineage, count_reads_taxid
+from sam2lca.utils import taxid_to_lineage, count_reads_taxid, get_json
 
 test_dir = os.path.join(os.path.dirname(__file__))
 db_dir = os.path.join(test_dir, "test_utils_dbdir")
 os.makedirs(db_dir, exist_ok=True)
-
 
 read_ancestor_dict = {
     "read_A": 562,
@@ -56,6 +55,9 @@ def test_taxid_to_lineage(taxo_db):
     assert test_res[300267]["count_taxon"] == 4
     assert test_res[300267]["count_descendant"] == 4
 
+def test_json():
+    test_acc2tax = get_json("https://raw.githubusercontent.com/maxibor/sam2lca/master/data/acc2tax.json")
+    assert test_acc2tax["mapfiles"]["test"] == "https://raw.githubusercontent.com/maxibor/sam2lca/master/data/acc2tax/test.accession2taxid.gz"
 
 def test_cleanup():
     rmtree(db_dir)
