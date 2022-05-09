@@ -1,0 +1,26 @@
+{
+    "test": {
+        "url": {
+            "names": "https://raw.githubusercontent.com/maxibor/sam2lca/master/data/taxonomy/test/names.dmp.gz",
+            "nodes": "https://raw.githubusercontent.com/maxibor/sam2lca/master/data/taxonomy/test/nodes.dmp.gz",
+            "merged": "https://raw.githubusercontent.com/maxibor/sam2lca/master/data/taxonomy/test/merged.dmp.gz"
+        },
+        "md5": {
+            "names": "https://raw.githubusercontent.com/maxibor/sam2lca/master/data/taxonomy/test/names.dmp.gz.md5",
+            "nodes": "https://raw.githubusercontent.com/maxibor/sam2lca/master/data/taxonomy/test/nodes.dmp.gz.md5",
+            "merged": "https://raw.githubusercontent.com/maxibor/sam2lca/master/data/taxonomy/test/merged.dmp.gz.md5"
+        }
+    },
+    "gtdb_r207": {
+        "url": {
+            "names": "https://raw.githubusercontent.com/maxibor/sam2lca/master/data/taxonomy/gtdb/r207/names.dmp.gz",
+            "nodes": "https://raw.githubusercontent.com/maxibor/sam2lca/master/data/taxonomy/gtdb/r207/nodes.dmp.gz",
+            "merged": "https://raw.githubusercontent.com/maxibor/sam2lca/master/data/taxonomy/gtdb/r207/merged.dmp.gz"
+        },
+        "md5": {
+            "names": "https://raw.githubusercontent.com/maxibor/sam2lca/master/data/taxonomy/gtdb/r207/names.dmp.gz.md5",
+            "nodes": "https://raw.githubusercontent.com/maxibor/sam2lca/master/data/taxonomy/gtdb/r207/nodes.dmp.gz.md5",
+            "merged": "https://raw.githubusercontent.com/maxibor/sam2lca/master/data/taxonomy/gtdb/r207/merged.dmp.gz.md5"
+        }
+    }
+}
