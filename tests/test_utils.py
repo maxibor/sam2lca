@@ -6,7 +6,6 @@ from sam2lca.main import update_database
 from sam2lca.utils import taxid_to_lineage, count_reads_taxid
 
 test_dir = os.path.join(os.path.dirname(__file__))
-data_dir = os.path.join(test_dir, "data")
 db_dir = os.path.join(test_dir, "test_utils_dbdir")
 os.makedirs(db_dir, exist_ok=True)
 

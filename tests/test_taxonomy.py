@@ -7,7 +7,6 @@ from sam2lca.main import update_database
 from sam2lca.lca import compute_lca
 
 test_dir = os.path.join(os.path.dirname(__file__))
-data_dir = os.path.join(test_dir, "data")
 db_dir = os.path.join(test_dir, "test_taxonomy_dbdir")
 os.makedirs(db_dir, exist_ok=True)
 
