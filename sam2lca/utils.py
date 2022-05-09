@@ -11,11 +11,11 @@ from tqdm import tqdm
 from functools import partial
 import hashlib
 import urllib.request as urllib
+from urllib.error import URLError
 import shutil
 from subprocess import check_output
 import sys
 import gzip
-
 
 warnings.simplefilter(action="ignore", category=FutureWarning)
 
@@ -247,3 +247,24 @@ def decompress(filepath):
         with open(decomp_filepath, "wb") as f_out:
             shutil.copyfileobj(f_in, f_out)
     return decomp_filepath
+
+def get_json(json_path):
+    """Reads map_config.json file
+    Args:
+        json_path (str): Path to acc2tax.json file
+    Returns:
+        dict: json
+    """
+    
+    if json_path.startswith("http"):
+        try:
+            with urllib.urlopen(json_path) as f:
+                config = json.loads(f.read())
+        except URLError as e:
+            logging.error(e)
+            sys.exit(1)
+    else:
+        with open(json_path, 'r') as f:
+            config = json.load(f)        
+
+    return config

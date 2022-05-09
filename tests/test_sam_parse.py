@@ -1,7 +1,6 @@
 import os
 from sam2lca.parse_alignment import Alignment
-from sam2lca.main import update_database
-from sam2lca.data import acc2tax_default
+from sam2lca.utils import get_json
 from shutil import rmtree
 import pickle
 import pytest
@@ -16,9 +15,6 @@ maptype = "test"
 
 
 def test_build_taxonomy_acc2tax_db(script_runner):
-    nodes = os.path.join(data_dir, "taxonomy", "nodes.dmp")
-    names = os.path.join(data_dir, "taxonomy", "names.dmp")
-    merged = os.path.join(data_dir, "taxonomy", "merged.dmp")
     ret = script_runner.run(
         "sam2lca",
         "--dbdir",
@@ -26,12 +22,6 @@ def test_build_taxonomy_acc2tax_db(script_runner):
         "update-db",
         "--taxonomy",
         "test",
-        "--taxo_nodes",
-        nodes,
-        "--taxo_names",
-        names,
-        "--taxo_merged",
-        merged,
         "--acc2tax",
         "test",
     )
@@ -44,8 +34,8 @@ def test_parse_sam():
 
     sam = os.path.join(data_dir, "aligned.sorted.bam")
     al = Alignment(al_file=sam, nb_steps=7)
-    
-    al.get_refs_taxid(acc2tax_dbname = os.path.join(db_dir, acc2tax_default["map_db"][maptype]), taxo_db=taxo_db)
+    config = get_json("https://raw.githubusercontent.com/maxibor/sam2lca/master/data/acc2tax.json")
+    al.get_refs_taxid(acc2tax_dbname = os.path.join(db_dir, config["map_db"][maptype]), taxo_db=taxo_db)
     
     read_dict_i_0_8 = al.get_reads(
         process=2,

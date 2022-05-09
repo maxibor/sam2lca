@@ -1,6 +1,6 @@
 # Databases
 
-sam2lca uses two different type of databases:
+**sam2lca** uses two different type of databases:
 
 - a **taxonomy** database to infer the Lowest Common Ancestor (LCA) and retrieve the names and lineage associated to a *taxonomic identifier* (TAXID)
 - an **acc2tax** or *accession to TAXID* database, to match sequence accession to a taxonomic identifier
@@ -104,12 +104,12 @@ sam2lca update-db --taxonomy my_custom_db_name --taxo_names names.dmp --taxo_nod
 
 With sam2lca, you can provide a custom database to map accession numbers to TAXIDs.
 
-To do so, sam2lca can accept a [`JSON`](https://www.json.org/json-en.html) file, with the `--acc2tax_json` flag in the `sam2lca update-db` subcommand in combination with `--acc2tax custom`.
+To do so, sam2lca accepts a [`JSON`](https://www.json.org/json-en.html) file, with the `--acc2tax_json` flag in the `sam2lca update-db` subcommand in combination with `--acc2tax custom`.
 
 For example:
 
 ```bash
-sam2lca update-db --acc2tax_json acc2tax.json
+sam2lca update-db --acc2tax plant_markers --acc2tax_json acc2tax.json
 ```
 
 This JSON file should be formatted as below:
@@ -132,4 +132,8 @@ This JSON file should be formatted as below:
 }
 ```
 
-An example `json` file  can be found here: [map_config.json](https://raw.githubusercontent.com/maxibor/sam2lca/master/docs/tutorial/data/acc2tax.json)
+An example `json` file (the default `acc2tax.json`) can be found here: [acc2tax.json](https://raw.githubusercontent.com/maxibor/sam2lca/master/data/acc2tax.json)
+
+## Working offline
+
+To setup sam2lca databases, you will need an internet connection. If you're working on a system without a connection to internet, you can setup the database on another computer with access to internet, and then transfer over the sam2lca `database directory`.

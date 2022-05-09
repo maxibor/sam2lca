@@ -14,16 +14,10 @@ os.makedirs(db_dir, exist_ok=True)
 
 @pytest.fixture(autouse=True)
 def build_taxonomy_acc2tax_db(script_runner):
-    nodes = os.path.join(data_dir, "taxonomy", "nodes.dmp")
-    names = os.path.join(data_dir, "taxonomy", "names.dmp")
-    merged = os.path.join(data_dir, "taxonomy", "merged.dmp")
     update_database(
         dbdir=db_dir,
         acc2tax=None,
-        taxonomy="test",
-        taxo_nodes=nodes,
-        taxo_names=names,
-        taxo_merged=merged,
+        taxonomy="test"
     )
 
 

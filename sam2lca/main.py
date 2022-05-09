@@ -1,6 +1,5 @@
 from sam2lca.parse_alignment import Alignment
 from sam2lca.acc2tax import get_mapping
-from sam2lca.data import get_map_config, acc2tax_default
 from sam2lca.lca import compute_lca
 from sam2lca import utils
 from sam2lca.taxonomy import setup_taxopy_db, load_taxonomy_db
@@ -49,15 +48,12 @@ def sam2lca(
         logging.info(
             f"{taxonomy} taxonomy database is not installed. I'm trying to create it for you"
         )
-        setup_taxopy_db(
-            dbdir=dbdir,
-            db_type=taxonomy,
-        )
+        update_database(taxonomy=taxonomy, dbdir=dbdir, acc2tax=None)
     if acc2tax not in avail_acc2tax:
         logging.info(
             f"{acc2tax} acc2tax database is ls not installed. I'm trying to create it for you"
         )
-        get_mapping(map_config=acc2tax_default, maptype=acc2tax, dbdir=dbdir)
+        update_database(acc2tax=acc2tax, dbdir=dbdir)
     logging.info(f"Step 1/{nb_steps}: Loading taxonomy database")
     TAXDB = load_taxonomy_db(dbdir, taxonomy)
 
@@ -113,7 +109,7 @@ def update_database(
     taxo_nodes=None,
     taxo_merged=None,
     acc2tax="nucl",
-    acc2tax_json=None,
+    acc2tax_json="https://raw.githubusercontent.com/maxibor/sam2lca/master/data/acc2tax.json",
 ):
     """Performs LCA on SAM/BAM/CRAM alignment file
 
@@ -128,12 +124,11 @@ def update_database(
         acc2tax_json(str): Path to acc2tax json file
     """
 
-    if acc2tax_json is None and acc2tax is not None:
-        map_config = acc2tax_default
-    elif acc2tax_json is not None:
-        map_config, acc2tax = get_map_config(map_config_file=acc2tax_json)
+    
+    map_config = utils.get_json(json_path=acc2tax_json)
+
     if acc2tax is not None:
-        logging.info(f"* Downloading/updating acc2tax {acc2tax} database ")
+        logging.info(f"* Downloading/updating acc2tax {acc2tax} database")
 
         get_mapping(map_config=map_config, maptype=acc2tax, dbdir=dbdir)
 

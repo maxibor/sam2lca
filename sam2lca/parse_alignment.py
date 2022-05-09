@@ -33,7 +33,7 @@ def accession_to_taxid_lookup(accession_list, taxo_db):
                 acc2tax[i] = Taxon(taxid, taxo_db)
         except (TypeError, TaxidError) as e:
             # logging.error(f"{i} not found in acc2tax DB", e)
-            logging.error(f"{taxid} not found in acc2tax DB")
+            logging.error(f"Error with reference: {i}")
             continue
     return acc2tax
 

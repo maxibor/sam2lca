@@ -15,9 +15,6 @@ def test_help(script_runner):
 
 
 def test_build_taxonomy_acc2tax_db(script_runner):
-    nodes = os.path.join(data_dir, "taxonomy", "nodes.dmp")
-    names = os.path.join(data_dir, "taxonomy", "names.dmp")
-    merged = os.path.join(data_dir, "taxonomy", "merged.dmp")
     ret = script_runner.run(
         "sam2lca",
         "--dbdir",
@@ -25,12 +22,6 @@ def test_build_taxonomy_acc2tax_db(script_runner):
         "update-db",
         "--taxonomy",
         "test",
-        "--taxo_nodes",
-        nodes,
-        "--taxo_names",
-        names,
-        "--taxo_merged",
-        merged,
         "--acc2tax",
         "test",
     )

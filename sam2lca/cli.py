@@ -1,9 +1,9 @@
 #!/usr/bin/env python3
 
+import string
 import click
 from sam2lca import __version__
 from sam2lca.main import sam2lca, update_database, list_available_db
-from sam2lca.data import acc2tax_default
 from pathlib import Path
 
 
@@ -168,27 +168,20 @@ def analyze(ctx, no_args_is_help=True, **kwargs):
     default=None,
     help="merged.dmp file for Taxonomy database (optional). Only needed for custom taxonomy database (non ncbi or gtdb)",
 )
-@option(
+@click.option(
     "-a",
     "--acc2tax",
-    cls=MutuallyExclusiveOption,
-    type=click.Choice(
-        list(acc2tax_default["mapfiles"].keys()),
-        case_sensitive=False,
-    ),
+    type=str,
     default=None,
     show_default=True,
-    help="Type of acc2tax mapping database to build.",
-    mutually_exclusive=["acc2tax_json"],
+    help="Type of acc2tax mapping database to build."
 )
-@option(
+@click.option(
     "--acc2tax_json",
-    cls=MutuallyExclusiveOption,
-    type=click.Path(writable=True, dir_okay=False, file_okay=True),
-    default=None,
+    type=click.Path(),
+    default="https://raw.githubusercontent.com/maxibor/sam2lca/master/data/acc2tax.json",
     show_default=True,
     help="JSON file for specifying extra acc2tax mappings",
-    mutually_exclusive=["acc2tax"],
 )
 def update_db(ctx, no_args_is_help=True, **kwargs):
     update_database(**ctx.obj, **kwargs)
