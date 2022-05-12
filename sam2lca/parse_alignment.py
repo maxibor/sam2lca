@@ -16,14 +16,15 @@ from taxopy import Taxon
 from taxopy.exceptions import TaxidError
 
 
-def accession_to_taxid_lookup(accession_list, taxo_db):
+def accession_to_taxid_lookup(accession_list, taxo_db, unclassified_taxid=12908):
     """Get TAXID of hits from hit accessions per read
 
     Args:
         accession list (list): list of unique accession numbers
+        taxo_db (taxopy database): taxonomy database
+        unclassified_taxid(int): TAXID for unclassified sequences
     Returns:
         dict: {accession: taxid}
-        taxo_db (taxopy database): taxonomy database
     """
     acc2tax = dict()
     for i in tqdm(accession_list):
@@ -32,8 +33,7 @@ def accession_to_taxid_lookup(accession_list, taxo_db):
             if taxid != 0:
                 acc2tax[i] = Taxon(taxid, taxo_db)
         except (TypeError, TaxidError) as e:
-            # logging.error(f"{i} not found in acc2tax DB", e)
-            logging.error(f"Error with reference: {i}")
+            acc2tax[i] = Taxon(unclassified_taxid, taxo_db)
             continue
     return acc2tax
 

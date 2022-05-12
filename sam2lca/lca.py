@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 
 from functools import partial
-from taxopy import find_lca
+from taxopy import find_lca, Taxon
 from taxopy.core import TaxidError
 from tqdm.contrib.concurrent import thread_map
 import logging
@@ -18,17 +18,18 @@ def taxids_to_lca(read_dict_item, taxo_db, unclassified_taxid=12908):
         taxids.remove(0)
     except KeyError:
         pass
-    if len(taxids) == 1:
-        ancestor = tuple(taxids)[0].taxid
-    elif len(taxids) > 1:
-        try:
+    try:
+        if len(taxids) == 1:
+            ancestor = tuple(taxids)[0].taxid
+        elif len(taxids) > 1:
             ancestor = find_lca(tuple(taxids), taxo_db).taxid
-        except TaxidError as e:
-            logging.error(e)
-            logging.error(taxids)
-            ancestor = unclassified_taxid
-    else:
-        ancestor = unclassified_taxid
+        else:
+            ancestor = Taxon(unclassified_taxid, taxo_db)
+    except (TaxidError, AttributeError) as e:
+        logging.error(e)
+        logging.error(taxids)
+        ancestor = Taxon(unclassified_taxid, taxo_db)
+        
 
     ANCESTORS_DICT.update({read: ancestor})
 
