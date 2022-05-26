@@ -1,4 +1,4 @@
-__version__ = "1.0.0-beta"
+__version__ = "1.0.0"
 
 from sam2lca.main import sam2lca
 import logging

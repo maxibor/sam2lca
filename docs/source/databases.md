@@ -104,7 +104,7 @@ sam2lca update-db --taxonomy my_custom_db_name --taxo_names names.dmp --taxo_nod
 
 With sam2lca, you can provide a custom database to map accession numbers to TAXIDs.
 
-To do so, sam2lca accepts a [`JSON`](https://www.json.org/json-en.html) file, with the `--acc2tax_json` flag in the `sam2lca update-db` subcommand in combination with `--acc2tax custom`.
+To do so, sam2lca accepts a [`JSON`](https://www.json.org/json-en.html) file, with the `--acc2tax_json` flag in the `sam2lca update-db` subcommand.
 
 For example:
 
