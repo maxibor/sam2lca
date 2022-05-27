@@ -5,6 +5,7 @@
     <a href="https://sam2lca.readthedocs.io"><img src="https://readthedocs.org/projects/sam2lca/badge/?version=latest"/></a>
     <a href="https://pypi.org/project/sam2lca"><img src="https://img.shields.io/badge/install%20with-pip-blue"/></a>
     <a href="https://anaconda.org/maxibor/sam2lca"><img src="https://anaconda.org/maxibor/sam2lca/badges/version.svg"/></a>
+    <a href="https://zenodo.org/badge/latestdoi/216578442"><img src="https://zenodo.org/badge/216578442.svg" alt="DOI"></a>
 </p>
 
 # sam2lca

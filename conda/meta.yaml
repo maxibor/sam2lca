@@ -14,7 +14,7 @@ build:
     - sam2lca = sam2lca.cli:cli
   noarch: python
   script: {{ PYTHON }} -m pip install . -vv
-  number: 1
+  number: 0
 
 requirements:
   host:
