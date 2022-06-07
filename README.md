@@ -39,7 +39,7 @@ sam2lca analyze --help
 ### With [Conda](https://docs.conda.io/en/latest/) (recommended)
 
 ```bash
-conda install -c conda-forge -c bioconda -c maxibor sam2lca
+conda install -c bioconda sam2lca
 ```
 
 ### With [pip](https://pypi.org/project/pip/)
