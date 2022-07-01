@@ -19,6 +19,16 @@ import gzip
 
 warnings.simplefilter(action="ignore", category=FutureWarning)
 
+taxo_ranks = [
+    'strain',
+    'species',
+    'genus',
+    'family',
+    'order',
+    'class',
+    'phylum',
+    'superkingdom'
+]
 
 def count_reads_taxid(read_taxid_dict):
     """Returns number of reads matching TAXID
@@ -103,10 +113,12 @@ def taxid_to_lineage_single(taxid_items, taxid_info_dict, taxo_db):
         sciname = taxon.name
         rank = taxon.rank
         lineage = taxon.rank_name_dictionary
+        taxid_lineage = taxon.taxid_lineage
     except Exception:
         sciname = "unclassified sequences"
         rank = "NA"
         lineage = "NA"
+        taxid_lineage = "NA"
 
     taxid_info_dict[taxid] = {
         "name": sciname,
@@ -114,6 +126,7 @@ def taxid_to_lineage_single(taxid_items, taxid_info_dict, taxo_db):
         "count_taxon": read_count_taxon,
         "count_descendant": read_count_descendant,
         "lineage": lineage,
+        "lineage_taxid": taxid_lineage,
     }
 
 
@@ -164,6 +177,13 @@ def taxid_to_lineage(taxid_count_dict, output, process, nb_steps, taxo_db):
 
     return taxid_info_dict
 
+
+def filter_taxid_info_dict(taxid_info_dict, rank, minread):
+    taxid_info_dict_filtered = dict()
+    for entry in taxid_info_dict:
+        if taxid_info_dict[entry]['rank'] == rank and taxid_info_dict[entry]['count_descendant'] >= minread:
+            taxid_info_dict_filtered[entry] = taxid_info_dict[entry]
+    return taxid_info_dict_filtered
 
 def get_db_connection(db_path):
     return rocksdb.DB(db_path, opts=rocksdb.Options(), read_only=True)

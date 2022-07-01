@@ -4,6 +4,7 @@ import string
 import click
 from sam2lca import __version__
 from sam2lca.main import sam2lca, update_database, list_available_db
+from sam2lca.utils import taxo_ranks
 from pathlib import Path
 
 
@@ -130,6 +131,20 @@ def cli(ctx, dbdir):
     "--bam_out",
     is_flag=True,
     help="Write BAM output file with XT tag for TAXID",
+)
+@click.option(
+    "-r",
+    "--bam_split_rank",
+    type=click.Choice(taxo_ranks, case_sensitive=False),
+    help="Write BAM output file split by TAXID at rank -r. To use in combination with -b/--bam_out",
+)
+@click.option(
+    "-n",
+    "--bam_split_read",
+    type=int,
+    default=50,
+    show_default=True,
+    help="Minimum numbers of reads to write BAM split by TAXID. To use in combination with -b/--bam_out",
 )
 def analyze(ctx, no_args_is_help=True, **kwargs):
     """\b

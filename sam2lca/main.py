@@ -3,12 +3,15 @@ from sam2lca.acc2tax import get_mapping
 from sam2lca.lca import compute_lca
 from sam2lca import utils
 from sam2lca.taxonomy import setup_taxopy_db, load_taxonomy_db
-from sam2lca.write_alignment import write_bam_tags
+from sam2lca.write_alignment import write_bam_tags, write_bam_by_taxid
 from pathlib import Path
 import logging
 from multiprocessing import cpu_count
+from tqdm.contrib.concurrent import thread_map
+from functools import partial
 import sys
 import os
+from pprint import pprint
 
 
 def sam2lca(
@@ -23,6 +26,8 @@ def sam2lca(
     length=30,
     conserved=False,
     bam_out=False,
+    bam_split_rank=False,
+    bam_split_read=50,
 ):
     """Performs LCA on SAM/BAM/CRAM alignment file
 
@@ -37,6 +42,8 @@ def sam2lca(
         edit_distance(int): Maximum edit distance threshold
         length(int): Minimum alignment length
         bam_out(bool): Write BAM output file with XT tag for TAXID
+        bam_split_rank(str): Rank to split BAM output file by TAXID
+        bam_split_read(int): Minimum number of reads to split BAM output file by TAXID
     """
     nb_steps = 8 if conserved else 7
     process = cpu_count() if process == 0 else process
@@ -88,6 +95,33 @@ def sam2lca(
         nb_steps=nb_steps,
         taxo_db=TAXDB,
     )
+
+
+    if bam_out and bam_split_rank:
+        logging.info(f"* BAM files split by TAXID at the {bam_split_rank} level")
+        taxids_list = utils.filter_taxid_info_dict(
+            taxid_info_dict,
+            rank=bam_split_rank, 
+            minread=bam_split_read
+        ).keys()
+        write_bam_by_taxid_partial = partial(
+            write_bam_by_taxid,
+            infile=sam,
+            outfile=output["bam"],
+            total_reads = al.total_reads,
+            read_taxid_dict=reads_taxid_dict,
+            acc2tax_dict=al.acc2tax,
+            taxid_info_dict=taxid_info_dict,
+            identity=identity,
+            edit_distance=distance,
+            minlength=length,
+        )
+        thread_map(write_bam_by_taxid_partial, 
+                    taxids_list,
+                    chunksize=1,
+                    max_workers=process,
+        )
+
     if bam_out:
         write_bam_tags(
             infile=sam,
