@@ -104,6 +104,8 @@ def sam2lca(
             rank=bam_split_rank, 
             minread=bam_split_read
         ).keys()
+
+
         write_bam_by_taxid_partial = partial(
             write_bam_by_taxid,
             infile=sam,
@@ -122,7 +124,7 @@ def sam2lca(
                     max_workers=process,
         )
 
-    if bam_out:
+    if bam_out and not bam_split_rank:
         write_bam_tags(
             infile=sam,
             outfile=output["bam"],

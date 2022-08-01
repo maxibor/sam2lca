@@ -1,5 +1,5 @@
 import logging
-from pysam import AlignmentFile
+from pysam import AlignmentFile, AlignedSegment
 from tqdm import tqdm
 
 def write_bam_by_taxid(
@@ -34,12 +34,19 @@ def write_bam_by_taxid(
 
     with AlignmentFile(infile, mode[filetype]) as samfile:
         reflens = dict()
+        aligned_refs = set()
+        for ref_stat in samfile.get_index_statistics():
+            refname = ref_stat[0]
+            nb_mapped_reads = ref_stat[1]
+            if nb_mapped_reads > 0:
+                aligned_refs.add(refname)
 
-        for ref in samfile.references:
+        for ref in aligned_refs:
             try:
                 if target_taxid in acc2tax_dict[ref].taxid_lineage:
                     reflens[ref] = samfile.get_reference_length(ref)
             except KeyError:
+                logging.error(f"Error with reference {ref}")
                 continue
 
         header = {
@@ -51,13 +58,12 @@ def write_bam_by_taxid(
         refid_dict = dict()
         for i, ref in enumerate(reflens.keys()):
             refid_dict[ref] = i 
-        with AlignmentFile(outfile, "wb", header=header) as outfile:
+        with AlignmentFile(outfile, "wb", header=header, reference_names=refid_dict.keys()) as bamout:
             for read in tqdm(samfile,  desc=str(target_taxid), unit="reads", total=total_reads):
                 if read.has_tag("NM") and not read.is_unmapped:
                     mismatch = read.get_tag("NM")
                     alnLen = read.query_alignment_length
                     readLen = read.query_length
-                    ident = (alnLen - mismatch) / readLen
                     if edit_distance:
                         threshold = edit_distance
                         align_value = mismatch
@@ -65,32 +71,40 @@ def write_bam_by_taxid(
                         threshold = 1 - identity
                         align_value = 1 - ((alnLen - mismatch) / readLen)
                     if align_value <= threshold and alnLen >= minlength:
-                        try:
-                            taxid = read_taxid_dict[read.query_name]
-                            if target_taxid in taxid_info_dict[taxid]['lineage_taxid']:
-                                read.set_tag("XT", taxid, "i")
-                                read.set_tag(
+                        read_taxid = read_taxid_dict[read.query_name]
+                        if target_taxid in taxid_info_dict[read_taxid]['lineage_taxid']:
+                            try:
+                                rw = AlignedSegment()
+                                rw.query_name = read.query_name
+                                rw.query_sequence= read.query_sequence
+                                rw.flag = read.flag
+                                rw.reference_id = refid_dict[read.reference_name]
+                                rw.reference_start = read.reference_start
+                                rw.mapping_quality = read.mapping_quality
+                                rw.cigar = read.cigar
+                                rw.next_reference_id = refid_dict[read.next_reference_name]
+                                rw.next_reference_start=read.next_reference_start
+                                rw.template_length=read.template_length
+                                rw.query_qualities = read.query_qualities
+                                rw.tags = read.tags
+
+                                rw.set_tag("XT", read_taxid, "i")
+                                rw.set_tag(
                                     "XN",
-                                    taxid_info_dict[taxid]["name"],
+                                    taxid_info_dict[read_taxid]["name"],
                                     "Z",
                                 )
-                                read.set_tag(
+                                rw.set_tag(
                                     "XR",
-                                    taxid_info_dict[taxid]["rank"],
+                                    taxid_info_dict[read_taxid]["rank"],
                                     "Z",
                                 )
-                                read.reference_id = refid_dict[read.reference_name]
-                                try:
-                                        outfile.write(read)
-                                except ValueError:
-                                    logging.error(f"Error writing read {read.query_name}")
-                                    continue
-                        except KeyError:
-                            # print(read, read.reference_name, read.reference_id)
-                            continue
-                            
-        outfile.close()
-    samfile.close()
+                                bamout.write(rw)
+                            except KeyError as e:
+                                logging.error(e)
+                                continue
+
+                                
 
 
 def write_bam_tags(
@@ -120,13 +134,12 @@ def write_bam_tags(
     mode = {"sam": "r", "bam": "rb", "cram": "rc"}
     filetype = infile.split(".")[-1]
     with AlignmentFile(infile, mode[filetype]) as samfile:
-        with AlignmentFile(outfile, "wb", template=samfile) as outfile:
+        with AlignmentFile(outfile, "wb", template=samfile) as bamout:
             for read in tqdm(samfile, unit="reads", total=total_reads):
                 if read.has_tag("NM") and not read.is_unmapped:
                     mismatch = read.get_tag("NM")
                     alnLen = read.query_alignment_length
                     readLen = read.query_length
-                    ident = (alnLen - mismatch) / readLen
                     if edit_distance:
                         threshold = edit_distance
                         align_value = mismatch
@@ -168,6 +181,4 @@ def write_bam_tags(
                         "unclassified sequences",
                         "Z",
                     )
-                outfile.write(read)
-        outfile.close()
-    samfile.close()
+                bamout.write(read)
