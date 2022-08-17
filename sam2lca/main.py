@@ -104,12 +104,11 @@ def sam2lca(
             rank=bam_split_rank, 
             minread=bam_split_read
         ).keys()
-
-
-        write_bam_by_taxid_partial = partial(
-            write_bam_by_taxid,
+        
+        write_bam_by_taxid(
+            target_taxids=taxids_list,
             infile=sam,
-            outfile=output["bam"],
+            outfile_base=output["bam"],
             total_reads = al.total_reads,
             read_taxid_dict=reads_taxid_dict,
             acc2tax_dict=al.acc2tax,
@@ -117,11 +116,6 @@ def sam2lca(
             identity=identity,
             edit_distance=distance,
             minlength=length,
-        )
-        thread_map(write_bam_by_taxid_partial, 
-                    taxids_list,
-                    chunksize=1,
-                    max_workers=process,
         )
 
     if bam_out and not bam_split_rank:
