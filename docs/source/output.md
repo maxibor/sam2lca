@@ -268,3 +268,38 @@ For Example:
 - Reads with the LCA's TAXID equal to `300267`:  `samtools view --tag XT:300267 aligned.sorted.bam`
 - Reads with the LCA's rank at `strain` level: `samtools view --tag XR:genus aligned.sorted.sam2lca.bam`
 - Reads with the LCA's scientific name being `Shigella dysenteriae Sd197`: `samtools view --tag XN:"Shigella dysenteriae Sd197" aligned.sorted.sam2lca.bam`
+
+## BAM split by TAXID at given rank
+
+Using the combination of flags `-b -r [REPLACE WITH DESIRED TAXONOMIC RANK]`, sam2lca will write one BAM file per TAXID at a given taxonomic rank. Each BAM file will contain only the reads whose LCA's lineage contains the given TAXID.
+
+For example, (test files available [here](https://github.com/maxibor/sam2lca/tree/master/tests/data))
+
+```bash
+$ sam2lca analyze -p 6 -b -r species -i 0.9 tests/data/aligned.sorted.bam
+Step 1/7: Loading taxonomy database
+Step 2/7: Loading acc2tax database
+Step 3/7: Converting accession numbers to TAXIDs
+100%|███████████████████████████████████████████████████████████████████████████████████████████████████████| 4/4 [00:00<00:00, 94.39it/s]
+Step 4/7: Parsing reads in alignment file
+100%|████████████████████████████████████████████████████████████████████████████████████████| 61047/61047 [00:00<00:00, 288040.30reads/s]
+Step 5/7: Assigning LCA to reads
+100%|█████████████████████████████████████████████████████████████████████████████████████████████| 2875/2875 [00:00<00:00, 499466.68it/s]
+Step 6/7: Converting TAXIDs to taxonomic lineages
+100%|████████████████████████████████████████████████████████████████████████████████████████████████████| 3/3 [00:00<00:00, 55676.60it/s]
+100%|█████████████████████████████████████████████████████████████████████████████████████████████████| 14/14 [00:00<00:00, 242645.69it/s]
+Step 7/7: writing sam2lca results:
+* JSON to aligned.sorted.sam2lca.json
+* CSV to aligned.sorted.sam2lca.csv
+* BAM files split by TAXID at the species level
+  - Escherichia coli (taxid: 562) - aligned.sorted_taxid_562.sam2lca.bam
+  - Shigella dysenteriae (taxid: 622) - aligned.sorted_taxid_622.sam2lca.bam
+100%|█████████████████████████████████████████████████████████████████████████████████████████| 61047/61047 [00:00<00:00, 70799.74reads/s]
+```
+
+In this case, the results haven been written into two different BAM files, with all the reads having a LCA at the species level (or having the species TAXID in their LCA's lineage).
+
+This means that :
+
+- all the reads having a LCA as the *Escherichia coli* species or lower (strain, subspecies, isolate, ...) have been written to `aligned.sorted_taxid_562.sam2lca.bam`
+- all the reads having a LCA as the *Shigella dysenteriae* species or lower (strain, subspecies, isolate, ...) have been written to `aligned.sorted_taxid_622.sam2lca.bam`
