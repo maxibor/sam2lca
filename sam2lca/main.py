@@ -104,7 +104,7 @@ def sam2lca(
             rank=bam_split_rank, 
             minread=bam_split_read
         ).keys()
-        
+
         write_bam_by_taxid(
             target_taxids=taxids_list,
             infile=sam,
@@ -116,6 +116,7 @@ def sam2lca(
             identity=identity,
             edit_distance=distance,
             minlength=length,
+            process=process
         )
 
     if bam_out and not bam_split_rank:
@@ -128,6 +129,7 @@ def sam2lca(
             identity=identity,
             edit_distance=distance,
             minlength=length,
+            process=process
         )
     return taxid_info_dict
 

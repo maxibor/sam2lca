@@ -12,7 +12,8 @@ def write_bam_by_taxid(
     taxid_info_dict,
     identity,
     edit_distance,
-    minlength
+    minlength,
+    process
 ):
     """Write alignment file with taxonomic information tag
 
@@ -27,11 +28,12 @@ def write_bam_by_taxid(
         identity (float): Minimum identity for alignment
         edit_distance (int): Minimum edit distance for alignment
         minlength (int): Minimum length for alignment
+        process (int): Number of threads to use
     """
     mode = {"sam": "r", "bam": "rb", "cram": "rc"}
     filetype = infile.split(".")[-1]
 
-    with AlignmentFile(infile, mode[filetype], threads=8) as samfile:
+    with AlignmentFile(infile, mode[filetype], threads=process) as samfile:
         aligned_refs = set()
         for ref_stat in samfile.get_index_statistics():
             refname = ref_stat[0]
@@ -71,7 +73,7 @@ def write_bam_by_taxid(
                 outfile, 
                 "wb", 
                 header=header_dict[taxid], 
-                reference_names=refid_dict[taxid].keys(), threads=8)
+                reference_names=refid_dict[taxid].keys(), threads=process)
 
         for read in tqdm(samfile, unit="reads", total=total_reads):
             if read.has_tag("NM") and not read.is_unmapped:
@@ -135,7 +137,9 @@ def write_bam_tags(
     identity,
     edit_distance,
     minlength,
+    process,
     unclassified_taxid=12908,
+    
 ):
     """Write alignment file with taxonomic information tag
 
@@ -148,12 +152,13 @@ def write_bam_tags(
         identity (float): Minimum identity for alignment
         edit_distance (int): Minimum edit distance for alignment
         minlength (int): Minimum length for alignment
+        process (int): Number of threads to use
     """
     logging.info(f"* Writing BAM file with taxonomic information tag to {outfile}")
     mode = {"sam": "r", "bam": "rb", "cram": "rc"}
     filetype = infile.split(".")[-1]
-    with AlignmentFile(infile, mode[filetype]) as samfile:
-        with AlignmentFile(outfile, "wb", template=samfile) as bamout:
+    with AlignmentFile(infile, mode[filetype], threads=process) as samfile:
+        with AlignmentFile(outfile, "wb", template=samfile, threads=process) as bamout:
             for read in tqdm(samfile, unit="reads", total=total_reads):
                 if read.has_tag("NM") and not read.is_unmapped:
                     mismatch = read.get_tag("NM")
