@@ -5,6 +5,14 @@ All notable changes to [sam2lca](https://github.com/maxibor/sam2lca) will be doc
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## 1.1.2
+
+- Performance improvement when writing bam split by TAXID
+
+## 1.1.1
+
+Patch release for 1.1.0: Fix the index of bam alignment sam2lca output files when split by rank
+
 ## 1.1.0
 
 - Added the option to split bam ouput file by TAXID at specified rank
