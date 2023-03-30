@@ -5,6 +5,10 @@ All notable changes to [sam2lca](https://github.com/maxibor/sam2lca) will be doc
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## 1.1.3
+
+- escape the case that there are no reads that pass the minimal percent identity threshold
+
 ## 1.1.2
 
 - Performance improvement when writing bam split by TAXID
