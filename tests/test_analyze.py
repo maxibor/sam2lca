@@ -34,8 +34,9 @@ def test_build_taxonomy_acc2tax_db(script_runner):
 
 
 def test_analyze_cli(script_runner):
-    bam = os.path.join(data_dir, "aligned.sorted.bam")
-    ret = script_runner.run(
+    bam1 = os.path.join(data_dir, "aligned.sorted.bam")
+    bam2 = os.path.join(data_dir, "no_reads_passing_threshold.bam")
+    ret1 = script_runner.run(
         "sam2lca",
         "--dbdir",
         db_dir,
@@ -46,10 +47,24 @@ def test_analyze_cli(script_runner):
         "test",
         "--output",
         output,
-        bam,
+        bam1,
     )
-    assert ret.success
+    assert ret1.success
 
+    ret2 = script_runner.run(
+        "sam2lca",
+        "--dbdir",
+        db_dir,
+        "analyze",
+        "--taxonomy",
+        "test",
+        "--acc2tax",
+        "test",
+        "--output",
+        output,
+        bam2,
+    )
+    assert ret2.success
 
 def test_analyze_results():
     json_file = os.path.join(data_dir, "results", "aligned.sorted.sam2lca.json")
