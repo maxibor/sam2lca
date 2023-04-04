@@ -159,21 +159,27 @@ def taxid_to_lineage(taxid_count_dict, output, process, nb_steps, taxo_db):
     )
 
     df = pd.DataFrame(taxid_info_dict).transpose()
-    df["lineage"] = (
-        df["lineage"]
-        .astype(str)
-        .str.replace("[\[\]\{\}]", "")
-        .str.replace(", ", " || ")
-        .str.replace("'", "")
-    )
-    df.sort_values("count_descendant", inplace=True, ascending=False)
-    df.to_csv(f"{output}.csv", index_label="TAXID")
+    if df.shape[0] > 0:
+        df["lineage"] = (
+            df["lineage"]
+            .astype(str)
+            .str.replace("[\[\]\{\}]", "")
+            .str.replace(", ", " || ")
+            .str.replace("'", "")
+        )
+        df.sort_values("count_descendant", inplace=True, ascending=False)
+        df.to_csv(f"{output}.csv", index_label="TAXID")
+    else:
+        logging.info("WARNING: no reads fulfilled the selected identity "
+                     f"threshold. Skip writing results to {output}.csv")
 
     with open(f"{output}.json", "w") as write_file:
         json.dump(taxid_info_dict, write_file)
     logging.info(
-        f"Step {7 if nb_steps == 7 else 8 }/{nb_steps}: writing sam2lca results:\n* JSON to {output}.json\n* CSV to {output}.csv"
+        f"Step {7 if nb_steps == 7 else 8 }/{nb_steps}: writing sam2lca results:\n* JSON to {output}.json"
     )
+    if df.shape[0] > 0:
+        logging.info(f"* CSV to {output}.csv")
 
     return taxid_info_dict
 

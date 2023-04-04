@@ -97,7 +97,7 @@ def sam2lca(
     )
 
 
-    if bam_out and bam_split_rank:
+    if bam_out and bam_split_rank and taxid_info_dict:
         logging.info(f"* BAM files split by TAXID at the {bam_split_rank} level")
         taxids_list = utils.filter_taxid_info_dict(
             taxid_info_dict,
@@ -119,7 +119,7 @@ def sam2lca(
             process=process
         )
 
-    if bam_out and not bam_split_rank:
+    if bam_out and not bam_split_rank and taxid_info_dict:
         write_bam_tags(
             infile=sam,
             outfile=output["bam"],
