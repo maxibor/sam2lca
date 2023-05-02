@@ -146,6 +146,14 @@ def cli(ctx, dbdir):
     show_default=True,
     help="Minimum numbers of reads to write BAM split by TAXID. To use in combination with -b/--bam_out",
 )
+@click.option(
+    "-G",
+    "--greengenes-lineage",
+    is_flag=True,
+    default=False,
+    show_default=True,
+    help="Report lineages as greengenes-style strings (k_Bacteria;p_Pseudomonadota;...) rather than JSON lineage dicts.",
+)
 def analyze(ctx, no_args_is_help=True, **kwargs):
     """\b
     Run the sam2lca analysis
