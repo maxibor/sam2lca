@@ -98,7 +98,7 @@ def reassign_count_lineage(taxid_items, read_taxid_dict_reassign, taxo_db):
             read_taxid_dict_reassign[t][1] += read_count
 
 
-def taxid_to_lineage_single(taxid_items, taxid_info_dict, taxo_db):
+def taxid_to_lineage_single(taxid_items, taxid_info_dict, taxo_db, greengenes=False):
     """Retrieve Taxonomic lineage and species name from NCBI TAXID
 
     Args:
@@ -112,7 +112,16 @@ def taxid_to_lineage_single(taxid_items, taxid_info_dict, taxo_db):
         taxon = Taxon(taxid, taxo_db)
         sciname = taxon.name
         rank = taxon.rank
-        lineage = taxon.rank_name_dictionary
+        if greengenes:
+            ggprefix = {
+                    "superkingdom": "K", "kingdom": "k",
+                    "phylum": "p", "class": "c",
+                    "order": "o", "family": "f",
+                    "genus": "g", "species": "s",
+            }
+            lineage = ";".join([f"{ggprefix[rank]}__{name}" for rank, name in reversed(taxon.rank_name_dictionary.items()) if rank in ggprefix])
+        else:
+            lineage = json.dumps(taxon.rank_name_dictionary)
         taxid_lineage = taxon.taxid_lineage
     except Exception:
         sciname = "unclassified sequences"
@@ -130,7 +139,7 @@ def taxid_to_lineage_single(taxid_items, taxid_info_dict, taxo_db):
     }
 
 
-def taxid_to_lineage(taxid_count_dict, output, process, nb_steps, taxo_db):
+def taxid_to_lineage(taxid_count_dict, output, process, nb_steps, taxo_db, greengenes=False):
     logging.info(
         f"Step {6 if nb_steps == 7 else 7 }/{nb_steps}: Converting TAXIDs to taxonomic lineages"
     )
@@ -149,7 +158,7 @@ def taxid_to_lineage(taxid_count_dict, output, process, nb_steps, taxo_db):
     )
     taxid_info_dict = dict()
     taxid_to_lineage_single_partial = partial(
-        taxid_to_lineage_single, taxid_info_dict=taxid_info_dict, taxo_db=taxo_db
+        taxid_to_lineage_single, taxid_info_dict=taxid_info_dict, taxo_db=taxo_db, greengenes=greengenes
     )
     res = thread_map(
         taxid_to_lineage_single_partial,
@@ -160,13 +169,6 @@ def taxid_to_lineage(taxid_count_dict, output, process, nb_steps, taxo_db):
 
     df = pd.DataFrame(taxid_info_dict).transpose()
     if df.shape[0] > 0:
-        df["lineage"] = (
-            df["lineage"]
-            .astype(str)
-            .str.replace("[\[\]\{\}]", "")
-            .str.replace(", ", " || ")
-            .str.replace("'", "")
-        )
         df.sort_values("count_descendant", inplace=True, ascending=False)
         df.to_csv(f"{output}.csv", index_label="TAXID")
     else:

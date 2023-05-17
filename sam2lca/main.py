@@ -28,6 +28,7 @@ def sam2lca(
     bam_out=False,
     bam_split_rank=False,
     bam_split_read=50,
+    greengenes_lineage=False,
 ):
     """Performs LCA on SAM/BAM/CRAM alignment file
 
@@ -94,6 +95,7 @@ def sam2lca(
         process=process,
         nb_steps=nb_steps,
         taxo_db=TAXDB,
+        greengenes=greengenes_lineage,
     )
 
 
