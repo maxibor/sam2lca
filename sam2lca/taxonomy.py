@@ -2,6 +2,7 @@ from pkg_resources import ExtractionError
 from taxopy import TaxDb
 from taxopy.exceptions import DownloadError
 import pickle
+from logging import info as logging_info
 from logging import error as logging_error
 from os.path import isfile as os_isfile
 from sys import exit as sys_exit
@@ -27,9 +28,10 @@ def get_taxonomy(
     taxdumps_local = dict()
 
     if taxo_type not in taxdumps:
-        logging_error(f"Taxonomy {taxo_type} not available")
-        logging_error(f"Available taxonomies: {', '.join(taxdumps.keys())}")
-        sys_exit(1)
+        logging_info(f"Taxonomy {taxo_type} not available from precompiled taxonomies")
+        logging_info(f"Available precompiled taxonomies: {', '.join(taxdumps.keys())}")
+        logging_info(f"Falling back to custom taxonomy using user provided dump files")
+        taxdumps_local = None
     else:
         for file in taxdumps[taxo_type]["url"]:
             fname = download_and_checksum(
@@ -70,9 +72,10 @@ def setup_taxopy_db(dbdir, db_type="ncbi", nodes=None, names=None, merged=None):
 
     if db_type.lower() != "ncbi":
         taxonomy = get_taxonomy(dbdir = dbdir, taxo_type=db_type.lower())
-        nodes = taxonomy["nodes"]
-        names = taxonomy["names"]
-        merged = taxonomy["merged"]
+        if taxonomy:
+            nodes = taxonomy["nodes"]
+            names = taxonomy["names"]
+            merged = taxonomy["merged"]
 
     if db_type.lower() != "ncbi" and not nodes and not names and not merged:
         logging_error(
@@ -91,6 +94,7 @@ def setup_taxopy_db(dbdir, db_type="ncbi", nodes=None, names=None, merged=None):
         Path(dbdir).mkdir(exist_ok=True)
         with open(f"{dbdir}/{db_type}.pkl", "wb") as f:
             pickle.dump(TAXDB, f)
+        logging_info(f"Taxonomy database {db_type} successfully created")
     except (DownloadError, ExtractionError) as e:
         logging_error("Error while creating taxonomy database")
         logging_error(e)
