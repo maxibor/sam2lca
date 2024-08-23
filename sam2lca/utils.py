@@ -43,12 +43,14 @@ def count_reads_taxid(read_taxid_dict):
 
 def output_file(thepath):
     out = os.path.basename(thepath).split(".")[:-1]
+    basedir = os.path.dirname(thepath)
     if len(out) == 0:
-        out = {"sam2lca": f"{thepath}.sam2lca", "bam": f"{thepath}.bam"}
+        out = {"sam2lca": f"{thepath}.sam2lca", "bam": f"{thepath}.bam", "basedir": basedir}
     else:
         out = {
             "sam2lca": ".".join(out) + ".sam2lca",
             "bam": ".".join(out) + ".sam2lca.bam",
+            "basedir": basedir
         }
 
     return out

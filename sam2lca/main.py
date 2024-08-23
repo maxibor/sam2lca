@@ -90,7 +90,7 @@ def sam2lca(
     taxid_counts = utils.count_reads_taxid(reads_taxid_dict)
     taxid_info_dict = utils.taxid_to_lineage(
         taxid_counts,
-        output["sam2lca"],
+        os.path.join(output['basedir'], output["sam2lca"]),
         process=process,
         nb_steps=nb_steps,
         taxo_db=TAXDB,
@@ -108,7 +108,7 @@ def sam2lca(
         write_bam_by_taxid(
             target_taxids=taxids_list,
             infile=sam,
-            outfile_base=output["bam"],
+            outfile_base=os.path.join(output['basedir'], output["bam"]),
             total_reads = al.total_reads,
             read_taxid_dict=reads_taxid_dict,
             acc2tax_dict=al.acc2tax,
@@ -122,7 +122,7 @@ def sam2lca(
     if bam_out and not bam_split_rank and taxid_info_dict:
         write_bam_tags(
             infile=sam,
-            outfile=output["bam"],
+            outfile=os.path.join(output['basedir'], output["bam"]),
             total_reads=al.total_reads,
             read_taxid_dict=reads_taxid_dict,
             taxid_info_dict=taxid_info_dict,
